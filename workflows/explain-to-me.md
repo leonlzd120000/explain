@@ -30,12 +30,24 @@ https://leonlzd120000.github.io/explain/
 
 ## Workflow
 
+0. Run the understanding skill first.
+   - Load/call `understand-explain` from:
+
+     ```text
+     /Users/lee/.agents/skills/understand-explain/SKILL.md
+     ```
+
+   - Use it as the first reasoning pass before designing the page.
+   - If `.understand-anything/knowledge-graph.json` exists, use the skill to inspect the relevant project/topic context.
+   - If the knowledge graph does not exist, note the limitation briefly and continue with the explanatory website workflow.
+
 1. Interpret the topic.
    - Identify the target audience.
    - Decide the single learning outcome.
    - Convert the topic into a clear page structure.
 
 2. Design the explanation.
+   - Use the output or constraints from `understand-explain` as source context.
    - Use the `frontend-design` skill by default.
    - Choose a visual metaphor specific to the topic.
    - Include one memorable interactive or animated element when useful.
