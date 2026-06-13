@@ -55,6 +55,9 @@ https://leonlzd120000.github.io/explain/
 
 3. Build the page.
    - Edit the existing Vite React project.
+   - Never delete or overwrite existing generated projects or unrelated repository code.
+   - Add each new explanation as an independent project/page and preserve previous pages.
+   - Update the project index so every generated page has a visible link and remains accessible.
    - Keep the first screen useful and explanatory.
    - Use real UI states, diagrams, labels, and progressive sections.
    - Use responsive CSS for desktop, tablet, and mobile.
@@ -104,6 +107,8 @@ Keep the final response short:
 ## Quality Bar
 
 - The page teaches the concept, not just describes it.
+- Existing code and generated pages are preserved.
+- Every generated project is linked from the page index.
 - Mobile layout is a first-class requirement.
 - The page must feel intentionally designed for the topic.
 - The final URL must be shareable in Discord.

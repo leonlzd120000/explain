@@ -1,9 +1,58 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
-import { ArrowRight, Zap, Brain, Layers, Target, Sparkles } from 'lucide-react';
+import { ArrowRight, Zap, Brain, Layers, Target, Sparkles, ExternalLink } from 'lucide-react';
 import './styles.css';
 
-function App() {
+const generatedProjects = [
+  {
+    id: 'large-language-models',
+    title: 'How Large Language Models Work',
+    summary: 'An interactive explainer for tokenization, transformer layers, attention, and next-token prediction.',
+    href: '#/large-language-models',
+    tag: 'AI fundamentals',
+  },
+];
+
+function ProjectHub() {
+  return (
+    <main className="shell">
+      <section className="hub-hero">
+        <p className="eyebrow">Explain to me</p>
+        <h1>Generated explainers stay preserved and linked.</h1>
+        <p className="lede">
+          Each new page is added as a separate project instead of replacing previous work.
+          Use this index to open every generated explanation.
+        </p>
+      </section>
+
+      <section className="project-library" aria-labelledby="project-library-title">
+        <div className="section-header">
+          <Layers size={22} />
+          <h2 id="project-library-title">Generated projects</h2>
+        </div>
+        <div className="project-grid">
+          {generatedProjects.map((project) => (
+            <a className="project-card" href={project.href} key={project.id}>
+              <span className="project-tag">{project.tag}</span>
+              <h3>{project.title}</h3>
+              <p>{project.summary}</p>
+              <span className="project-link">
+                Open project <ExternalLink size={16} />
+              </span>
+            </a>
+          ))}
+        </div>
+      </section>
+
+      <div className="footer">
+        <div>Project index • React + Vite • GitHub Pages</div>
+        <div>leonlzd120000/explain</div>
+      </div>
+    </main>
+  );
+}
+
+function LlmPage() {
   const [selectedWord, setSelectedWord] = useState(null);
   const [prompt, setPrompt] = useState("The future of AI is");
   const [generated, setGenerated] = useState([]);
@@ -29,6 +78,13 @@ function App() {
 
   return (
     <main className="shell">
+      <nav className="project-nav" aria-label="Project navigation">
+        <a href="#/" className="nav-link">All projects</a>
+        <a href="https://github.com/leonlzd120000/explain" className="nav-link">
+          Repository <ExternalLink size={14} />
+        </a>
+      </nav>
+
       {/* Hero */}
       <section className="hero">
         <div>
@@ -220,6 +276,22 @@ function App() {
       </div>
     </main>
   );
+}
+
+function App() {
+  const [route, setRoute] = useState(window.location.hash || '#/');
+
+  useEffect(() => {
+    const handleHashChange = () => setRoute(window.location.hash || '#/');
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, []);
+
+  if (route === '#/large-language-models') {
+    return <LlmPage />;
+  }
+
+  return <ProjectHub />;
 }
 
 createRoot(document.getElementById('root')).render(<App />);
