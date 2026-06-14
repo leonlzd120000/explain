@@ -1229,10 +1229,12 @@ function GitPage() {
 }
 
 function App() {
-  const [route, setRoute] = useState(window.location.hash || '#/');
+  // Robust hash routing (handles GitHub Pages subpath, query strings, and direct #/git loads)
+  const getCurrentHash = () => (window.location.hash || '#/').split('?')[0] || '#/';
+  const [route, setRoute] = useState(getCurrentHash());
 
   useEffect(() => {
-    const handleHashChange = () => setRoute(window.location.hash || '#/');
+    const handleHashChange = () => setRoute(getCurrentHash());
     window.addEventListener('hashchange', handleHashChange);
     return () => window.removeEventListener('hashchange', handleHashChange);
   }, []);
