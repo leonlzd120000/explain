@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
-import { ArrowRight, Zap, Brain, Layers, Target, Sparkles, ExternalLink, ScrollText, Database, Clock, AlertTriangle, SlidersHorizontal, RefreshCw, Mountain, Cpu, TrendingUp, Users, Lightbulb } from 'lucide-react';
+import { ArrowRight, Zap, Brain, Layers, Target, Sparkles, ExternalLink, ScrollText, Database, Clock, AlertTriangle, SlidersHorizontal, RefreshCw, Mountain, Cpu, TrendingUp, Users, Lightbulb, GitBranch, GitCommit, GitMerge, GitPullRequest, Folder, FileText, RotateCcw, Plus, Minus } from 'lucide-react';
 import './styles.css';
 
 const generatedProjects = [
@@ -24,6 +24,13 @@ const generatedProjects = [
     summary: 'What "general intelligence" really means, how scaling + reasoning gets us closer, the remaining hard problems, and interactive tools to explore the horizon.',
     href: '#/agi',
     tag: 'Frontier AI',
+  },
+  {
+    id: 'git',
+    title: 'How Git Works',
+    summary: 'The directed acyclic graph of commits, the staging area, branches, merges, and the .git directory as a content-addressable filesystem. Live simulators.',
+    href: '#/git',
+    tag: 'Version control',
   },
 ];
 
@@ -823,6 +830,343 @@ function AgiPage() {
   );
 }
 
+function GitPage() {
+  // Live commit graph + HEAD
+  const [commits, setCommits] = useState([
+    { id: 'a1b2c3', msg: 'Initial commit', parents: [], ts: '2025-01-01' },
+    { id: 'd4e5f6', msg: 'Add README', parents: ['a1b2c3'], ts: '2025-01-02' },
+    { id: 'g7h8i9', msg: 'Fix bug in parser', parents: ['d4e5f6'], ts: '2025-01-03' },
+  ]);
+  const [head, setHead] = useState('g7h8i9');
+  const [branches, setBranches] = useState({ main: 'g7h8i9' });
+  const [currentBranch, setCurrentBranch] = useState('main');
+
+  // Staging area simulator
+  const [workingDir, setWorkingDir] = useState({
+    'README.md': '# Project\n\nHello world',
+    'src/app.js': 'console.log("hello")',
+    'package.json': '{ "name": "demo" }'
+  });
+  const [staged, setStaged] = useState({});
+  const [commitMsg, setCommitMsg] = useState('Update files');
+
+  // For merge / conflict demo
+  const [showConflict, setShowConflict] = useState(false);
+  const [conflictResolution, setConflictResolution] = useState(null);
+
+  // Reflog (time travel)
+  const [reflog, setReflog] = useState([
+    { action: 'commit', id: 'g7h8i9', msg: 'Fix bug in parser' },
+    { action: 'commit', id: 'd4e5f6', msg: 'Add README' },
+    { action: 'commit', id: 'a1b2c3', msg: 'Initial commit' },
+  ]);
+
+  const currentHeadCommit = commits.find(c => c.id === head) || commits[commits.length-1];
+  const graph = [...commits].reverse(); // newest at top for visual
+
+  const editFile = (filename) => {
+    const current = workingDir[filename] || '';
+    const newContent = current + '\n// edit at ' + new Date().toLocaleTimeString();
+    setWorkingDir(prev => ({ ...prev, [filename]: newContent }));
+  };
+
+  const stageFile = (filename) => {
+    const content = workingDir[filename];
+    setStaged(prev => ({ ...prev, [filename]: content }));
+  };
+
+  const unstageFile = (filename) => {
+    setStaged(prev => {
+      const copy = { ...prev };
+      delete copy[filename];
+      return copy;
+    });
+  };
+
+  const doCommit = () => {
+    if (Object.keys(staged).length === 0) return;
+    const newId = Math.random().toString(16).slice(2, 8);
+    const newCommit = {
+      id: newId,
+      msg: commitMsg || 'Update files',
+      parents: [head],
+      ts: new Date().toISOString().split('T')[0]
+    };
+    setCommits(prev => [...prev, newCommit]);
+    setHead(newId);
+    setBranches(prev => ({ ...prev, [currentBranch]: newId }));
+    setReflog(prev => [{ action: 'commit', id: newId, msg: newCommit.msg }, ...prev]);
+    setStaged({});
+    setCommitMsg('Update files');
+  };
+
+  const createBranch = (name) => {
+    if (branches[name]) return;
+    setBranches(prev => ({ ...prev, [name]: head }));
+  };
+
+  const checkout = (branchName) => {
+    const target = branches[branchName];
+    if (!target) return;
+    setCurrentBranch(branchName);
+    setHead(target);
+  };
+
+  const simulateMerge = () => {
+    // Simple conflict demo: create a feature branch with conflicting edit on same file
+    const featureHead = head;
+    const conflictFile = 'src/app.js';
+    
+    // Simulate feature branch change
+    const featureContent = (workingDir[conflictFile] || '') + '\n// feature: add feature X';
+    
+    // Current (main) also edited
+    const mainContent = (workingDir[conflictFile] || '') + '\n// main: add logging';
+    
+    setShowConflict(true);
+    setWorkingDir(prev => ({ ...prev, [conflictFile]: mainContent })); // pretend main has change
+    setStaged(prev => ({ ...prev, [conflictFile]: mainContent }));
+    
+    // On merge click it will show resolver
+  };
+
+  const resolveConflict = (choice) => {
+    const conflictFile = 'src/app.js';
+    let resolvedContent = '';
+    if (choice === 'ours') resolvedContent = workingDir[conflictFile] || '';
+    else resolvedContent = (workingDir[conflictFile] || '') + '\n// resolved with theirs';
+    
+    setWorkingDir(prev => ({ ...prev, [conflictFile]: resolvedContent }));
+    setStaged(prev => ({ ...prev, [conflictFile]: resolvedContent }));
+    setShowConflict(false);
+    setConflictResolution(choice);
+    
+    // Auto-commit the merge
+    const newId = Math.random().toString(16).slice(2, 8);
+    const newCommit = { id: newId, msg: `Merge branch 'feature'`, parents: [head, 'feature-sim'], ts: new Date().toISOString().split('T')[0] };
+    setCommits(prev => [...prev, newCommit]);
+    setHead(newId);
+    setReflog(prev => [{ action: 'merge', id: newId, msg: 'Merge branch feature' }, ...prev]);
+  };
+
+  const resetToReflog = (entryId) => {
+    setHead(entryId);
+    setReflog(prev => [{ action: 'reset --hard', id: entryId, msg: 'Hard reset to ' + entryId }, ...prev]);
+  };
+
+  const gitCatFile = (commitId) => {
+    const c = commits.find(c => c.id === commitId);
+    if (!c) return 'object not found';
+    return `commit ${commitId}\nAuthor: Demo User\nDate: ${c.ts}\n\n    ${c.msg}\n\nparents: ${c.parents.join(', ') || 'none'}`;
+  };
+
+  useEffect(() => {
+    document.title = 'How Git Works • Explain to me';
+  }, []);
+
+  return (
+    <main className="shell git-page">
+      <nav className="project-nav" aria-label="Project navigation">
+        <a href="#/" className="nav-link">All projects</a>
+        <a href="#/agi" className="nav-link">AGI</a>
+        <a href="https://github.com/leonlzd120000/explain" className="nav-link">
+          Repository <ExternalLink size={14} />
+        </a>
+      </nav>
+
+      {/* Hero */}
+      <section className="hero git-hero">
+        <div>
+          <p className="eyebrow">Distributed Version Control</p>
+          <h1>How Git<br />Works</h1>
+          <p className="lede">
+            Git is a content-addressable filesystem with a DAG of commits, an index (staging area), and lightweight branches. Everything is a hash. History is immutable. The .git directory is the entire repository.
+          </p>
+          <div className="actions">
+            <a href="#graph" className="button button--primary">
+              Play with the commit graph <GitBranch size={18} />
+            </a>
+            <a href="#staging" className="button">
+              Stage &amp; commit
+            </a>
+          </div>
+        </div>
+
+        <div className="git-visual">
+          <div className="mini-graph">
+            {graph.slice(0, 4).map((c, i) => (
+              <div key={i} className={`mini-commit ${c.id === head ? 'head' : ''}`}>
+                {c.id.slice(0,6)} <span className="mini-msg">{c.msg}</span>
+              </div>
+            ))}
+          </div>
+          <div className="visual-label">A tiny slice of the commit DAG. HEAD points at the tip of the current branch.</div>
+        </div>
+      </section>
+
+      {/* 1. Commit Graph */}
+      <section className="section" id="graph">
+        <div className="section-header">
+          <GitCommit size={22} />
+          <h2>1. The Commit Graph (DAG)</h2>
+        </div>
+        <p>Commits are snapshots. Each commit points to its parent(s). The graph is append-only. HEAD is just a pointer.</p>
+
+        <div className="commit-graph">
+          {graph.map((c, idx) => (
+            <div key={c.id} className={`commit-node ${c.id === head ? 'is-head' : ''}`}>
+              <div className="commit-id">{c.id}</div>
+              <div className="commit-msg">{c.msg}</div>
+              <div className="commit-meta">{c.ts} • parents: {c.parents.length ? c.parents.join(', ') : 'root'}</div>
+              {c.id === head && <div className="head-badge">HEAD</div>}
+            </div>
+          ))}
+          <button className="button button--primary" onClick={() => {
+            const newId = Math.random().toString(16).slice(2, 8);
+            const newC = { id: newId, msg: 'New commit from graph', parents: [head], ts: new Date().toISOString().split('T')[0] };
+            setCommits(prev => [...prev, newC]);
+            setHead(newId);
+            setBranches(prev => ({ ...prev, [currentBranch]: newId }));
+            setReflog(prev => [{ action: 'commit', id: newId, msg: newC.msg }, ...prev]);
+          }}>
+            <Plus size={16} /> New commit on current HEAD
+          </button>
+        </div>
+      </section>
+
+      {/* 2. Staging Area */}
+      <section className="section" id="staging">
+        <div className="section-header">
+          <Folder size={22} />
+          <h2>2. The Staging Area (Index)</h2>
+        </div>
+        <p>The index is the "proposed next commit". Working directory changes are not recorded until you `git add` them.</p>
+
+        <div className="staging-area">
+          <div className="pane">
+            <h4>Working Directory</h4>
+            {Object.keys(workingDir).map(f => (
+              <div key={f} className="file-row">
+                <span><FileText size={14} /> {f}</span>
+                <button onClick={() => editFile(f)} className="small-btn">Edit</button>
+                <button onClick={() => stageFile(f)} className="small-btn primary">Stage</button>
+              </div>
+            ))}
+          </div>
+
+          <div className="pane">
+            <h4>Staging Area (Index)</h4>
+            {Object.keys(staged).length === 0 && <div className="empty">Nothing staged yet</div>}
+            {Object.keys(staged).map(f => (
+              <div key={f} className="file-row staged">
+                <span>{f}</span>
+                <button onClick={() => unstageFile(f)} className="small-btn">Unstage</button>
+              </div>
+            ))}
+            <div className="commit-box">
+              <input value={commitMsg} onChange={e => setCommitMsg(e.target.value)} placeholder="Commit message" />
+              <button className="button button--primary" onClick={doCommit} disabled={Object.keys(staged).length === 0}>
+                <GitCommit size={16} /> Commit
+              </button>
+            </div>
+          </div>
+
+          <div className="pane">
+            <h4>History (current branch)</h4>
+            <div className="history-list">
+              {commits.slice().reverse().slice(0, 5).map(c => (
+                <div key={c.id} className="hist-item">{c.id.slice(0,6)} — {c.msg}</div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 3. Branches & Merge */}
+      <section className="section">
+        <div className="section-header">
+          <GitBranch size={22} />
+          <h2>3. Branches &amp; Merge (with conflict)</h2>
+        </div>
+        <p>Branches are just movable pointers to commits. Merge creates a merge commit with two parents.</p>
+
+        <div className="branch-sim">
+          <div className="branch-list">
+            <strong>Branches:</strong>
+            {Object.keys(branches).map(b => (
+              <button key={b} className={`branch-btn ${b === currentBranch ? 'active' : ''}`} onClick={() => checkout(b)}>
+                {b} {b === currentBranch ? '(current)' : ''}
+              </button>
+            ))}
+            <button className="small-btn" onClick={() => createBranch('feature')}>+ Create "feature"</button>
+          </div>
+
+          <div className="merge-area">
+            <button className="button" onClick={simulateMerge}>
+              <GitMerge size={16} /> Simulate merge (will create conflict on src/app.js)
+            </button>
+            {showConflict && (
+              <div className="conflict-resolver">
+                <div className="conflict-header">Merge conflict in src/app.js</div>
+                <div className="conflict-actions">
+                  <button onClick={() => resolveConflict('ours')}>Accept "ours" (main)</button>
+                  <button onClick={() => resolveConflict('theirs')}>Accept "theirs" (feature)</button>
+                </div>
+              </div>
+            )}
+            {conflictResolution && <div className="resolved">Conflict resolved with {conflictResolution}. Merge commit created.</div>}
+          </div>
+        </div>
+      </section>
+
+      {/* 4. Reflog & Time Travel */}
+      <section className="section">
+        <div className="section-header">
+          <RotateCcw size={22} />
+          <h2>4. Reflog — Time Travel</h2>
+        </div>
+        <p>Git keeps a log of every movement of HEAD. Even "lost" commits can be recovered.</p>
+
+        <div className="reflog">
+          {reflog.map((entry, i) => (
+            <div key={i} className="reflog-entry">
+              <span>{entry.action} → {entry.id.slice(0,6)}</span>
+              <span className="msg">{entry.msg}</span>
+              <button className="small-btn" onClick={() => resetToReflog(entry.id)}>git reset --hard {entry.id.slice(0,6)}</button>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* 5. .git Internals */}
+      <section className="section">
+        <div className="section-header">
+          <Folder size={22} />
+          <h2>5. Inside .git (Content-Addressable Store)</h2>
+        </div>
+        <p>Objects are stored by SHA-1 hash. Blobs (file contents), Trees (directory listings), Commits. Nothing is named by filename — everything is content-addressed.</p>
+
+        <div className="internals">
+          <div className="object-list">
+            <h4>Recent objects</h4>
+            {commits.slice(-4).map(c => (
+              <div key={c.id} className="obj" onClick={() => alert(gitCatFile(c.id))}>
+                commit {c.id} — click to cat-file
+              </div>
+            ))}
+          </div>
+          <div className="note">In real Git: <code>git cat-file -p &lt;hash&gt;</code> shows the object. Everything is immutable and deduplicated by hash.</div>
+        </div>
+      </section>
+
+      <div className="footer">
+        <div>Git turns your filesystem into an append-only, content-addressed, distributed database • React + Vite • GitHub Pages</div>
+        <div>leonlzd120000/explain</div>
+      </div>
+    </main>
+  );
+}
+
 function App() {
   const [route, setRoute] = useState(window.location.hash || '#/');
 
@@ -842,6 +1186,8 @@ function App() {
       document.title = 'How Context Works in LLMs • Explain to me';
     } else if (route === '#/agi') {
       document.title = 'The Road to AGI • Explain to me';
+    } else if (route === '#/git') {
+      document.title = 'How Git Works • Explain to me';
     }
   }, [route]);
 
@@ -853,6 +1199,9 @@ function App() {
   }
   if (route === '#/agi') {
     return <AgiPage />;
+  }
+  if (route === '#/git') {
+    return <GitPage />;
   }
 
   return <ProjectHub />;
