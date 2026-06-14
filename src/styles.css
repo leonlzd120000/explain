@@ -1661,3 +1661,77 @@ h1 {
   border: 1px solid var(--accent);
 }
 
+
+/* === Git hash-object live demo (added for content-addressable teaching) === */
+.hash-demo {
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+.hash-demo h4 {
+  margin: 0 0 6px;
+  font-size: 0.95rem;
+  color: var(--accent-2);
+}
+.hash-demo .small {
+  font-size: 0.8rem;
+  color: var(--muted);
+  margin-bottom: 10px;
+  line-height: 1.4;
+}
+.hash-input {
+  width: 100%;
+  background: #0a0b0f;
+  border: 1px solid var(--border);
+  color: #f7f4ed;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-family: ui-monospace, monospace;
+  font-size: 0.85rem;
+  resize: vertical;
+  line-height: 1.4;
+}
+.hash-input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+.hash-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin: 10px 0 8px;
+  flex-wrap: wrap;
+}
+.computed-hash {
+  font-size: 0.75rem;
+  color: var(--muted);
+  font-family: ui-monospace, monospace;
+}
+.computed-hash code {
+  color: var(--accent);
+  background: rgba(255,189,89,0.08);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+.stored-list {
+  margin-top: 8px;
+  font-size: 0.75rem;
+}
+.stored-list strong {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--muted);
+  font-size: 0.7rem;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+@media (max-width: 820px) {
+  .hash-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .computed-hash {
+    margin-top: 4px;
+  }
+}

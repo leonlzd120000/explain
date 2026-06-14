@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
-import { ArrowRight, Zap, Brain, Layers, Target, Sparkles, ExternalLink, ScrollText, Database, Clock, AlertTriangle, SlidersHorizontal, RefreshCw, Mountain, Cpu, TrendingUp, Users, Lightbulb, GitBranch, GitCommit, GitMerge, GitPullRequest, Folder, FileText, RotateCcw, Plus, Minus } from 'lucide-react';
+import { ArrowRight, Zap, Brain, Layers, Target, Sparkles, ExternalLink, ScrollText, Database, Clock, AlertTriangle, SlidersHorizontal, RefreshCw, Mountain, Cpu, TrendingUp, Users, Lightbulb, GitBranch, GitCommit, GitMerge, GitPullRequest, Folder, FileText, RotateCcw, Plus, Minus, Hash } from 'lucide-react';
 import './styles.css';
 
 const generatedProjects = [
@@ -21,14 +21,14 @@ const generatedProjects = [
   {
     id: 'agi',
     title: 'The Road to AGI',
-    summary: 'What "general intelligence" really means, how scaling + reasoning gets us closer, the remaining hard problems, and interactive tools to explore the horizon.',
+    summary: 'What \"general intelligence\" really means, how scaling + reasoning gets us closer, the remaining hard problems, and interactive tools to explore the horizon.',
     href: '#/agi',
     tag: 'Frontier AI',
   },
   {
     id: 'git',
     title: 'How Git Works',
-    summary: 'The directed acyclic graph of commits, the staging area, branches, merges, and the .git directory as a content-addressable filesystem. Live simulators.',
+    summary: 'The directed acyclic graph of commits, the staging area, branches, merges, and the .git directory as a content-addressable filesystem. Live simulators + hash-object demo.',
     href: '#/git',
     tag: 'Version control',
   },
@@ -124,7 +124,6 @@ function LlmPage() {
             </a>
           </div>
         </div>
-
         <div className="token-visual">
           <div className="neural-bg" />
           <div className="token-stream">
@@ -172,7 +171,6 @@ function LlmPage() {
               <div className="layer-label">INPUT</div>
               <div className="layer-title">Token Embeddings</div>
             </div>
-
             <div className="attention">
               <div style={{ textAlign: 'center', zIndex: 1 }}>
                 <div style={{ fontSize: '0.75rem', color: '#8a877e', marginBottom: 4 }}>MULTI-HEAD</div>
@@ -181,7 +179,6 @@ function LlmPage() {
               <div className="arrow" style={{ position: 'absolute', left: '18%', width: '64px' }} />
               <div className="arrow" style={{ position: 'absolute', right: '18%', width: '64px', transform: 'rotate(180deg)' }} />
             </div>
-
             <div className="layer">
               <div className="layer-label">OUTPUT</div>
               <div className="layer-title">Next Token Logits</div>
@@ -667,7 +664,6 @@ function AgiPage() {
             </a>
           </div>
         </div>
-
         <div className="horizon-visual">
           <div className="ladder">
             {domains.slice(0, 3).map((d, i) => (
@@ -707,7 +703,6 @@ function AgiPage() {
               <input type="range" min="20" max="100" value={algo} onChange={e => setAlgo(+e.target.value)} />
             </div>
           </div>
-
           <div className="emergence">
             <div className="score">{emergence}</div>
             <div className="label">Emergence score</div>
@@ -730,7 +725,6 @@ function AgiPage() {
           <label>Projected year: <strong>{year}</strong></label>
           <input type="range" min="2020" max="2035" value={year} onChange={e => setYear(+e.target.value)} />
         </div>
-
         <div className="domain-grid">
           {domains.map((d, i) => {
             const currentHeight = Math.min(100, d.current + (year - 2025) * 2.5);
@@ -960,6 +954,42 @@ function GitPage() {
     return `commit ${commitId}\nAuthor: Demo User\nDate: ${c.ts}\n\n    ${c.msg}\n\nparents: ${c.parents.join(', ') || 'none'}`;
   };
 
+  // Live content-addressable hash demo — the heart of how .git actually stores everything
+  const [blobContent, setBlobContent] = useState('print("hello from git internals")');
+  const [storedBlobs, setStoredBlobs] = useState([
+    { hash: 'e69de29bb2d1d6434b8b29ae775ad8c2e48c5391', type: 'blob', content: 'hello world example' }
+  ]);
+
+  const computeGitHash = (content) => {
+    // Educational simulation of Git's content-addressable core.
+    // Real git: SHA-1( "blob " + len + "\0" + content ). Here we guarantee: identical content → identical "address".
+    const header = `blob ${content.length}\0`;
+    const full = header + content;
+    let h = 2166136261;
+    for (let i = 0; i < full.length; i++) {
+      h ^= full.charCodeAt(i);
+      h += (h << 1) + (h << 4) + (h << 7) + (h << 8) + (h << 24);
+    }
+    const hex = (h >>> 0).toString(16).padStart(8, '0');
+    return (hex + hex + hex + hex + hex).slice(0, 40); // 40-char fake SHA-1 look
+  };
+
+  const storeBlob = () => {
+    const h = computeGitHash(blobContent);
+    const exists = storedBlobs.some(o => o.hash === h);
+    if (!exists) {
+      setStoredBlobs(prev => [...prev, { hash: h, type: 'blob', content: blobContent }]);
+    }
+  };
+
+  const inspectObject = (obj) => {
+    if (obj.type === 'commit') {
+      alert(gitCatFile(obj.hash));
+    } else {
+      alert(`blob ${obj.hash}\n\n${obj.content}`);
+    }
+  };
+
   useEffect(() => {
     document.title = 'How Git Works • Explain to me';
   }, []);
@@ -991,7 +1021,6 @@ function GitPage() {
             </a>
           </div>
         </div>
-
         <div className="git-visual">
           <div className="mini-graph">
             {graph.slice(0, 4).map((c, i) => (
@@ -1053,7 +1082,6 @@ function GitPage() {
               </div>
             ))}
           </div>
-
           <div className="pane">
             <h4>Staging Area (Index)</h4>
             {Object.keys(staged).length === 0 && <div className="empty">Nothing staged yet</div>}
@@ -1070,7 +1098,6 @@ function GitPage() {
               </button>
             </div>
           </div>
-
           <div className="pane">
             <h4>History (current branch)</h4>
             <div className="history-list">
@@ -1100,7 +1127,6 @@ function GitPage() {
             ))}
             <button className="small-btn" onClick={() => createBranch('feature')}>+ Create "feature"</button>
           </div>
-
           <div className="merge-area">
             <button className="button" onClick={simulateMerge}>
               <GitMerge size={16} /> Simulate merge (will create conflict on src/app.js)
@@ -1156,6 +1182,41 @@ function GitPage() {
             ))}
           </div>
           <div className="note">In real Git: <code>git cat-file -p &lt;hash&gt;</code> shows the object. Everything is immutable and deduplicated by hash.</div>
+
+          {/* NEW: Live hash-object demo — signature interactive that makes the "content-addressable" idea click */}
+          <div className="hash-demo">
+            <h4>Live hash-object (the real magic)</h4>
+            <p className="small">Edit the text below. The "address" (hash) is derived only from the bytes. Identical content always produces the identical hash — this is why Git can store any file once and never duplicate it again.</p>
+            <textarea 
+              value={blobContent} 
+              onChange={e => setBlobContent(e.target.value)} 
+              className="hash-input"
+              rows={3}
+              placeholder="Any file content..."
+            />
+            <div className="hash-row">
+              <button className="button button--primary" onClick={storeBlob}>
+                <Hash size={16} /> git hash-object -w
+              </button>
+              <div className="computed-hash">
+                computed address: <code>{computeGitHash(blobContent).slice(0, 12)}…</code>
+              </div>
+            </div>
+            <div className="stored-list">
+              <strong>Objects currently "in .git/objects" (blobs + commits):</strong>
+              {storedBlobs.map((o, i) => (
+                <div key={'b'+i} className="obj" onClick={() => inspectObject(o)}>
+                  {o.type} {o.hash.slice(0,12)} — click to cat-file
+                </div>
+              ))}
+              {commits.slice(-2).map(c => (
+                <div key={c.id} className="obj" onClick={() => alert(gitCatFile(c.id))}>
+                  commit {c.id} — click
+                </div>
+              ))}
+            </div>
+            <div className="note" style={{marginTop: 8, fontSize: '0.75rem'}}>Try typing the exact same content twice — the hash stays identical and it won't duplicate in the list. Change one character → brand new address.</div>
+          </div>
         </div>
       </section>
 
