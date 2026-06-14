@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
-import { ArrowRight, Zap, Brain, Layers, Target, Sparkles, ExternalLink, ScrollText, Database, Clock, AlertTriangle, SlidersHorizontal, RefreshCw } from 'lucide-react';
+import { ArrowRight, Zap, Brain, Layers, Target, Sparkles, ExternalLink, ScrollText, Database, Clock, AlertTriangle, SlidersHorizontal, RefreshCw, Mountain, Cpu, TrendingUp, Users, Lightbulb } from 'lucide-react';
 import './styles.css';
 
 const generatedProjects = [
@@ -17,6 +17,13 @@ const generatedProjects = [
     summary: 'The context window as working memory, KV cache efficiency, attention dilution, and techniques to go beyond the limit.',
     href: '#/llm-context',
     tag: 'LLM internals',
+  },
+  {
+    id: 'agi',
+    title: 'The Road to AGI',
+    summary: 'What "general intelligence" really means, how scaling + reasoning gets us closer, the remaining hard problems, and interactive tools to explore the horizon.',
+    href: '#/agi',
+    tag: 'Frontier AI',
   },
 ];
 
@@ -583,6 +590,239 @@ function ContextPage() {
   );
 }
 
+function AgiPage() {
+  // Scaling simulator
+  const [compute, setCompute] = useState(60);
+  const [data, setData] = useState(55);
+  const [algo, setAlgo] = useState(45);
+
+  const emergence = Math.round(
+    (compute * 0.4 + data * 0.35 + algo * 0.25) / 1.5
+  );
+  const isEmergent = emergence > 75;
+
+  // Capability ladder
+  const domains = [
+    { name: 'Math & Reasoning', current: 85, agi: 98 },
+    { name: 'Coding', current: 78, agi: 95 },
+    { name: 'Science Discovery', current: 62, agi: 92 },
+    { name: 'Creative Work', current: 70, agi: 88 },
+    { name: 'Long-horizon Planning', current: 35, agi: 96 },
+    { name: 'Social & Emotional', current: 48, agi: 85 },
+  ];
+
+  const [year, setYear] = useState(2025);
+  const progress = Math.min(100, Math.max(0, (year - 2020) * 8 + (emergence - 50) / 2));
+
+  // Agent failure demo
+  const [agentType, setAgentType] = useState('narrow');
+  const task = "Plan a crewed mission to Mars including life support, launch windows, and contingencies.";
+  const agentOutputs = {
+    narrow: "I can look up current rocket specs and Mars distance. For the full plan you will need a human team.",
+    cot: "Step 1: Distance is 225M km average. Step 2: Use Starship-class vehicle. Step 3: ... [stops at high-level, cannot simulate 2-year mission dynamics or unknown failure modes]",
+    agi: "Full end-to-end plan generated with 47 contingency branches, real-time simulation of closed-loop life support, economic model for 15-year program, and self-updating risk register. Ready to execute or iterate."
+  };
+
+  // Definition spectrum
+  const [breadth, setBreadth] = useState(70);
+  const [depth, setDepth] = useState(55);
+  const agiScore = Math.round((breadth + depth) / 2);
+
+  useEffect(() => {
+    document.title = 'The Road to AGI • Explain to me';
+  }, []);
+
+  return (
+    <main className="shell agi-page">
+      <nav className="project-nav" aria-label="Project navigation">
+        <a href="#/" className="nav-link">All projects</a>
+        <a href="#/llm-context" className="nav-link">Context</a>
+        <a href="#/large-language-models" className="nav-link">LLM Basics</a>
+        <a href="https://github.com/leonlzd120000/explain" className="nav-link">
+          Repository <ExternalLink size={14} />
+        </a>
+      </nav>
+
+      {/* Hero */}
+      <section className="hero agi-hero">
+        <div>
+          <p className="eyebrow">The Horizon</p>
+          <h1>The Road to<br />Artificial General<br />Intelligence</h1>
+          <p className="lede">
+            AGI is not just "better AI". It is the point where a single system can match or exceed the full range of human intellectual capability across almost any domain, and keep improving itself.
+          </p>
+          <div className="actions">
+            <a href="#simulator" className="button button--primary">
+              Explore the emergence simulator <TrendingUp size={18} />
+            </a>
+            <a href="#gaps" className="button">
+              See the remaining gaps
+            </a>
+          </div>
+        </div>
+
+        <div className="horizon-visual">
+          <div className="ladder">
+            {domains.slice(0, 3).map((d, i) => (
+              <div key={i} className="ladder-rung">
+                <div className="label">{d.name}</div>
+                <div className="bar"><div className="fill" style={{ width: `${d.current}%` }} /></div>
+              </div>
+            ))}
+            <div className="agi-line" style={{ left: `${progress}%` }}>
+              <Mountain size={18} /> AGI horizon
+            </div>
+          </div>
+          <div className="visual-label">Current frontier systems vs. the generalist threshold (drag year to project)</div>
+        </div>
+      </section>
+
+      {/* Simulator */}
+      <section className="section" id="simulator">
+        <div className="section-header">
+          <TrendingUp size={22} />
+          <h2>1. The Emergence Simulator</h2>
+        </div>
+        <p>Most progress comes from scaling three ingredients. Move the sliders. Watch how "general" capability can suddenly jump when the combination crosses a threshold.</p>
+
+        <div className="simulator">
+          <div className="sliders">
+            <div>
+              <label>Compute (FLOPs &amp; chips) <strong>{compute}</strong></label>
+              <input type="range" min="20" max="100" value={compute} onChange={e => setCompute(+e.target.value)} />
+            </div>
+            <div>
+              <label>Data (tokens &amp; quality) <strong>{data}</strong></label>
+              <input type="range" min="20" max="100" value={data} onChange={e => setData(+e.target.value)} />
+            </div>
+            <div>
+              <label>Algorithmic novelty <strong>{algo}</strong></label>
+              <input type="range" min="20" max="100" value={algo} onChange={e => setAlgo(+e.target.value)} />
+            </div>
+          </div>
+
+          <div className="emergence">
+            <div className="score">{emergence}</div>
+            <div className="label">Emergence score</div>
+            <div className={`status ${isEmergent ? 'emergent' : ''}`}>
+              {isEmergent ? 'Emergent generalist behavior likely' : 'Still mostly narrow / brittle'}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Capability Ladder */}
+      <section className="section">
+        <div className="section-header">
+          <Mountain size={22} />
+          <h2>2. The Capability Ladder</h2>
+        </div>
+        <p>AGI is not one number. It is crossing the threshold across many domains at once. Adjust the "year" slider to see projected progress.</p>
+
+        <div className="ladder-controls">
+          <label>Projected year: <strong>{year}</strong></label>
+          <input type="range" min="2020" max="2035" value={year} onChange={e => setYear(+e.target.value)} />
+        </div>
+
+        <div className="domain-grid">
+          {domains.map((d, i) => {
+            const currentHeight = Math.min(100, d.current + (year - 2025) * 2.5);
+            return (
+              <div key={i} className="domain">
+                <div className="name">{d.name}</div>
+                <div className="bars">
+                  <div className="bar current" style={{ width: `${Math.min(100, currentHeight)}%` }}>
+                    <span>Now</span>
+                  </div>
+                  <div className="bar agi" style={{ width: `${d.agi}%` }}>
+                    <span>AGI</span>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* Agent Gaps */}
+      <section className="section" id="gaps">
+        <div className="section-header">
+          <Cpu size={22} />
+          <h2>3. Where Current Systems Still Fail</h2>
+        </div>
+        <p>Even the best models today are powerful tools or impressive reasoners on short horizons. True generality requires reliable long-term agency, robust world models, and open-ended self-improvement.</p>
+
+        <div className="agent-demo">
+          <div className="task">{task}</div>
+          <div className="types">
+            {['narrow', 'cot', 'agi'].map(t => (
+              <button key={t} className={`type-btn ${agentType === t ? 'active' : ''}`} onClick={() => setAgentType(t)}>
+                {t === 'narrow' ? 'Narrow Tool Use' : t === 'cot' ? 'Chain-of-Thought' : 'Hypothetical AGI'}
+              </button>
+            ))}
+          </div>
+          <div className="output">{agentOutputs[agentType]}</div>
+        </div>
+      </section>
+
+      {/* Definition Spectrum */}
+      <section className="section">
+        <div className="section-header">
+          <Lightbulb size={22} />
+          <h2>4. The AGI Definition Spectrum</h2>
+        </div>
+        <p>People argue about the definition because AGI lives on two axes: breadth (how many domains) and depth (how expert-level in each). Drag to place "today's frontier" and see the score.</p>
+
+        <div className="spectrum">
+          <div>
+            <label>Breadth (domains) {breadth}</label>
+            <input type="range" min="30" max="100" value={breadth} onChange={e => setBreadth(+e.target.value)} />
+          </div>
+          <div>
+            <label>Depth (expertise) {depth}</label>
+            <input type="range" min="30" max="100" value={depth} onChange={e => setDepth(+e.target.value)} />
+          </div>
+          <div className="agi-score">
+            AGI proximity score: <strong>{agiScore}</strong>/100
+            {agiScore > 85 && <span className="note"> — in the ballpark of many working definitions</span>}
+          </div>
+        </div>
+      </section>
+
+      {/* What changes */}
+      <section className="section">
+        <div className="section-header">
+          <Users size={22} />
+          <h2>5. What Actually Changes at AGI</h2>
+        </div>
+        <div className="changes-grid">
+          <div className="change-card">
+            <h4>Before (Current AI)</h4>
+            <ul>
+              <li>Powerful but narrow specialists</li>
+              <li>Requires heavy human scaffolding</li>
+              <li>Plateaus without new data/compute</li>
+            </ul>
+          </div>
+          <div className="change-card">
+            <h4>At AGI</h4>
+            <ul>
+              <li>One system can do research, engineering, strategy</li>
+              <li>Can run long autonomous projects</li>
+              <li>Can improve its own algorithms</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <div className="footer">
+        <div>AGI is the next phase transition in intelligence, not just another model release • React + Vite • GitHub Pages</div>
+        <div>leonlzd120000/explain</div>
+      </div>
+    </main>
+  );
+}
+
 function App() {
   const [route, setRoute] = useState(window.location.hash || '#/');
 
@@ -598,6 +838,10 @@ function App() {
       document.title = 'Explain to me | Generated Explainers';
     } else if (route === '#/large-language-models') {
       document.title = 'How Large Language Models Work • Explain to me';
+    } else if (route === '#/llm-context') {
+      document.title = 'How Context Works in LLMs • Explain to me';
+    } else if (route === '#/agi') {
+      document.title = 'The Road to AGI • Explain to me';
     }
   }, [route]);
 
@@ -606,6 +850,9 @@ function App() {
   }
   if (route === '#/llm-context') {
     return <ContextPage />;
+  }
+  if (route === '#/agi') {
+    return <AgiPage />;
   }
 
   return <ProjectHub />;
