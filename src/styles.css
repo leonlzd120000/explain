@@ -1958,3 +1958,147 @@ h1 {
   .response-pair { gap: 8px; }
   .metrics { gap: 12px; }
 }
+
+/* === Hermes Agent Explainer specific styles === */
+.hermes-page .hero {
+  grid-template-columns: 1.1fr 0.9fr;
+  align-items: start;
+}
+
+.hermes-visual {
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: #111317;
+  padding: 20px;
+  min-height: 220px;
+}
+
+.loop-diagram {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.85rem;
+}
+
+.loop-step {
+  padding: 8px 14px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  text-align: center;
+}
+
+.loop-diagram .arrow {
+  text-align: center;
+  color: var(--accent);
+  font-weight: 700;
+  line-height: 1;
+}
+
+.loop-sim {
+  margin-top: 20px;
+  padding: 20px;
+  background: #111317;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+}
+
+.goal-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.goal-row input {
+  flex: 1;
+  min-width: 260px;
+  background: #0a0b0f;
+  border: 1px solid var(--border);
+  color: #f7f4ed;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 0.95rem;
+}
+
+.skills-row {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+
+.skill-chip {
+  font-size: 0.75rem;
+  padding: 4px 10px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: #c9c5ba;
+}
+
+.skill-chip.active {
+  background: rgba(255, 189, 89, 0.15);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.trace {
+  background: #0a0b0f;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px;
+  min-height: 120px;
+  margin-bottom: 12px;
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+.trace-step {
+  padding: 6px 10px;
+  margin-bottom: 4px;
+  border-radius: 6px;
+  background: rgba(255,255,255,0.03);
+}
+
+.trace-step.thought { border-left: 3px solid #4f9cff; }
+.trace-step.tool { border-left: 3px solid var(--accent); }
+.trace-step.result { border-left: 3px solid #22c55e; }
+.trace-step.memory { border-left: 3px solid #a78bfa; }
+.trace-step.output { border-left: 3px solid #f59e0b; }
+.trace-step.skill, .trace-step.delegation { border-left: 3px solid #ec4899; }
+
+.step-label {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--muted);
+  margin-right: 8px;
+}
+
+.memory-panel {
+  font-size: 0.8rem;
+  background: #0a0b0f;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px;
+}
+
+.memory-panel pre {
+  margin: 6px 0 0;
+  font-size: 0.75rem;
+  color: #c9c5ba;
+  white-space: pre-wrap;
+}
+
+@media (max-width: 820px) {
+  .hermes-page .hero {
+    grid-template-columns: 1fr;
+  }
+  .goal-row {
+    flex-direction: column;
+  }
+  .goal-row input {
+    width: 100%;
+  }
+}
