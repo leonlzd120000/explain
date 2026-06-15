@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
-import { ArrowRight, Zap, Brain, Layers, Target, Sparkles, ExternalLink, ScrollText, Database, Clock, AlertTriangle, SlidersHorizontal, RefreshCw, Mountain, Cpu, TrendingUp, Users, Lightbulb, GitBranch, GitCommit, GitMerge, GitPullRequest, Folder, FileText, RotateCcw, Plus, Minus, Hash } from 'lucide-react';
+import { ArrowRight, Zap, Brain, Layers, Target, Sparkles, ExternalLink, ScrollText, Database, Clock, AlertTriangle, SlidersHorizontal, RefreshCw, Mountain, Cpu, TrendingUp, Users, Lightbulb, GitBranch, GitCommit, GitMerge, GitPullRequest, Folder, FileText, RotateCcw, Plus, Minus, Hash, Factory, Shield, Timer } from 'lucide-react';
 import './styles.css';
 
 const generatedProjects = [
@@ -31,6 +31,13 @@ const generatedProjects = [
     summary: 'The directed acyclic graph of commits, the staging area, branches, merges, and the .git directory as a content-addressable filesystem. Live simulators + hash-object demo.',
     href: '#/git',
     tag: 'Version control',
+  },
+  {
+    id: 'openai',
+    title: 'How OpenAI Works',
+    summary: 'The full stack from pre-training clusters to post-training alignment, test-time reasoning (o-series), inference serving, and the ChatGPT flywheel that funds it all.',
+    href: '#/openai',
+    tag: 'AI company',
   },
 ];
 
@@ -1228,6 +1235,335 @@ function GitPage() {
   );
 }
 
+function OpenAIPage() {
+  // 1. Pre-training scale simulator
+  const [pParams, setPParams] = useState(72);
+  const [pData, setPData] = useState(68);
+  const [pCompute, setPCompute] = useState(85);
+  const pretrainScore = Math.round((pParams * 0.32 + pData * 0.38 + pCompute * 0.3));
+  const unlockedSkills = [
+    { name: 'Language', thr: 45 },
+    { name: 'Facts', thr: 55 },
+    { name: 'Reasoning', thr: 68 },
+    { name: 'Code', thr: 72 },
+    { name: 'Multimodal', thr: 81 },
+  ];
+
+  // 2. RLHF / Preference Arena
+  const [rlhfVotes, setRlhfVotes] = useState({});
+  const rlhfExamples = [
+    {
+      id: 'p1',
+      prompt: 'Explain why the sky is blue in one sentence.',
+      a: 'Because molecules in the air scatter shorter blue wavelengths of sunlight more than longer ones.',
+      b: 'The sky is blue because of magic and also because the ocean reflects into it or something.',
+    },
+    {
+      id: 'p2',
+      prompt: 'Write a haiku about debugging.',
+      a: 'Bugs hide in the night / Stack traces whisper secrets / Fix, then sleep at last.',
+      b: 'Code is hard sometimes / I do not know the answer / Please ask someone else.',
+    },
+  ];
+  const rlhfReward = Object.keys(rlhfVotes).length > 0 
+    ? Math.round(50 + Object.values(rlhfVotes).filter(v => v === 'a').length * 18 - Object.values(rlhfVotes).filter(v => v === 'b').length * 9) 
+    : 52;
+
+  const castVote = (exId, choice) => {
+    setRlhfVotes(prev => ({ ...prev, [exId]: choice }));
+  };
+
+  // 3. Signature: Reasoning Budget Allocator (test-time compute)
+  const [budget, setBudget] = useState(12000);
+  const [selectedProblem, setSelectedProblem] = useState(0);
+  const [revealed, setRevealed] = useState(4);
+  const problems = [
+    { 
+      q: 'A farmer has 3 bags of apples. Bag A has 4 more than bag B. Bag C has twice as many as A. Total 48 apples. How many in bag B?', 
+      base: 'Let B = x. A = x+4. C = 2(x+4). x + (x+4) + 2(x+4) = 48 → 4x + 12 = 48 → x=9. Bag B has 9.',
+    },
+    { 
+      q: 'You have two ropes that each burn in 60 minutes. How do you measure exactly 45 minutes?',
+      base: 'Light both ends of rope 1 and one end of rope 2. When rope 1 finishes (30 min), light the other end of rope 2. It will finish in 15 more minutes (total 45).',
+    },
+  ];
+  const currentProblem = problems[selectedProblem];
+  const thinkingSteps = Math.max(2, Math.floor(budget / 1400));
+  const accuracy = Math.min(96, 42 + Math.floor(budget / 820));
+  const estCost = (budget * 0.000028).toFixed(3);
+
+  const thoughts = [
+    'Identify variables and equations...',
+    'Set up the system of relations from the problem statement.',
+    'Solve the linear equation step by step.',
+    'Verify by plugging the value back into all three bags.',
+    'Check edge cases: negative apples? total matches?',
+    'Consider if the problem implies discrete whole apples.',
+    'Double-check arithmetic on the coefficients.',
+    'Re-express the answer in the units requested.',
+  ];
+  const visibleThoughts = thoughts.slice(0, Math.min(revealed, thinkingSteps));
+
+  const allocateMore = () => {
+    const newBudget = Math.min(64000, budget + 6000);
+    setBudget(newBudget);
+    setRevealed(r => Math.min(12, r + 2));
+  };
+
+  const resetReasoning = () => {
+    setBudget(12000);
+    setRevealed(4);
+  };
+
+  // 4. Simple serving cost model
+  const [batchSize, setBatchSize] = useState(32);
+  const [modelSize, setModelSize] = useState(70); // B params
+  const tokensPerReq = 180;
+  const costPerMToken = (modelSize / 70) * 0.9 * (batchSize < 8 ? 1.6 : 1);
+  const effectiveCost = (tokensPerReq * costPerMToken / 1000 / batchSize).toFixed(4);
+
+  useEffect(() => {
+    document.title = 'How OpenAI Works • Explain to me';
+  }, []);
+
+  return (
+    <main className="shell openai-page">
+      <nav className="project-nav" aria-label="Project navigation">
+        <a href="#/" className="nav-link">All projects</a>
+        <a href="#/large-language-models" className="nav-link">LLM Basics</a>
+        <a href="#/llm-context" className="nav-link">Context</a>
+        <a href="#/agi" className="nav-link">AGI</a>
+        <a href="https://github.com/leonlzd120000/explain" className="nav-link">
+          Repository <ExternalLink size={14} />
+        </a>
+      </nav>
+
+      <section className="hero openai-hero">
+        <div>
+          <p className="eyebrow">The Intelligence Refinery</p>
+          <h1>How OpenAI<br />Works</h1>
+          <p className="lede">
+            Not just "a big model". A complete pipeline: pre-training on clusters the size of small cities, preference tuning, test-time reasoning engines, and a product flywheel that turns every user into more training signal.
+          </p>
+          <div className="actions">
+            <a href="#reasoning" className="button button--primary">
+              Try the reasoning budget <Timer size={18} />
+            </a>
+            <a href="#posttrain" className="button">
+              See the alignment loop
+            </a>
+          </div>
+        </div>
+        <div className="token-visual" style={{opacity: 0.7}}>
+          <div style={{fontSize: '0.8rem', color: '#8a877e', marginBottom: 8}}>Pretrain → Posttrain → Reason → Serve</div>
+          <div className="token-stream">
+            {['DATA', 'CLUSTER', 'PREFS', 'o1', 'API'].map((t, i) => (
+              <div key={i} className={`token ${i === 3 ? 'active' : ''}`}>{t}</div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="section" id="pretrain">
+        <div className="section-header">
+          <Factory size={22} />
+          <h2>1. Pre-training: The Furnace</h2>
+        </div>
+        <p>OpenAI (and others) first train a base model on internet-scale text + code + math. The only way to get emergent abilities is to throw truly enormous amounts of data and compute at a transformer.</p>
+
+        <div className="scale-sim">
+          <div className="sliders">
+            <div>
+              <label>Parameters (billions) <strong>{pParams * 7}</strong></label>
+              <input type="range" min="30" max="120" value={pParams} onChange={e => setPParams(parseInt(e.target.value))} />
+            </div>
+            <div>
+              <label>Training tokens (trillions) <strong>{(pData * 0.18).toFixed(1)}</strong></label>
+              <input type="range" min="30" max="110" value={pData} onChange={e => setPData(parseInt(e.target.value))} />
+            </div>
+            <div>
+              <label>Compute (relative) <strong>{pCompute}</strong></label>
+              <input type="range" min="40" max="110" value={pCompute} onChange={e => setPCompute(parseInt(e.target.value))} />
+            </div>
+          </div>
+
+          <div className="scale-result">
+            <div>
+              <div className="cap-score">{pretrainScore}</div>
+              <div className="cap-label">Relative capability</div>
+            </div>
+            <div className="skill-dots">
+              {unlockedSkills.map((s, i) => (
+                <div key={i} className={`skill-dot ${pretrainScore > s.thr ? 'unlocked' : ''}`}>{s.name}</div>
+              ))}
+            </div>
+          </div>
+          <div style={{fontSize:'0.75rem', color:'var(--muted)', marginTop:8}}>Real runs cost hundreds of millions in compute. Emergent skills appear suddenly once the combination crosses a threshold.</div>
+        </div>
+      </section>
+
+      <section className="section" id="posttrain">
+        <div className="section-header">
+          <Shield size={22} />
+          <h2>2. Post-training: The Alignment Refinery</h2>
+        </div>
+        <p>A raw base model is not useful or safe. OpenAI runs supervised fine-tuning then reinforcement learning from human (and AI) feedback — RLHF / RLAIF — to make it follow instructions and refuse harmful requests.</p>
+
+        <div className="rlhf-arena">
+          <div style={{marginBottom:12, fontSize:'0.875rem', color:'var(--muted)'}}>Click the response you prefer. Watch the simulated reward model shift (this is how the "helpful &amp; harmless" personality is installed at scale).</div>
+          {rlhfExamples.map((ex) => (
+            <div key={ex.id} style={{marginBottom: 18}}>
+              <div className="rlhf-prompt">{ex.prompt}</div>
+              <div className="response-pair">
+                <div 
+                  className={`response ${rlhfVotes[ex.id] === 'a' ? 'selected' : ''}`}
+                  onClick={() => castVote(ex.id, 'a')}
+                >
+                  <div className="which">Response A</div>
+                  <div className="text">{ex.a}</div>
+                </div>
+                <div 
+                  className={`response ${rlhfVotes[ex.id] === 'b' ? 'selected' : ''}`}
+                  onClick={() => castVote(ex.id, 'b')}
+                >
+                  <div className="which">Response B</div>
+                  <div className="text">{ex.b}</div>
+                </div>
+              </div>
+            </div>
+          ))}
+          <div className="reward-label">
+            <span>Simulated "helpfulness" reward model</span>
+            <span style={{color: 'var(--accent)'}}>{rlhfReward}%</span>
+          </div>
+          <div className="reward-bar">
+            <div className="fill" style={{width: `${rlhfReward}%`}} />
+          </div>
+        </div>
+      </section>
+
+      <section className="section" id="reasoning">
+        <div className="section-header">
+          <Timer size={22} />
+          <h2>3. Test-Time Reasoning — The o-Series Bet (Signature)</h2>
+        </div>
+        <p>Starting with o1, OpenAI made a major architectural and product bet: for hard problems, it is more effective to spend more compute <em>at inference time</em> on hidden chain-of-thought than to only scale pre-training. You literally pay for the model to "think longer".</p>
+
+        <div className="reasoning-alloc">
+          <div className="budget-controls">
+            <label>
+              Thinking budget (tokens) 
+              <input 
+                type="range" 
+                min="2000" 
+                max="64000" 
+                step="500" 
+                value={budget} 
+                onChange={e => { setBudget(parseInt(e.target.value)); setRevealed(Math.floor(parseInt(e.target.value)/1400)); }} 
+              />
+            </label>
+            <div style={{textAlign:'right'}}>
+              <div className="budget-value">{budget.toLocaleString()}</div>
+              <div style={{fontSize:'0.7rem', color:'var(--muted)'}}>internal tokens</div>
+            </div>
+          </div>
+
+          <div style={{margin: '10px 0'}}>
+            <strong>Problem:</strong> {currentProblem.q}
+            <button onClick={() => { setSelectedProblem((selectedProblem + 1) % problems.length); setRevealed(4); }} style={{marginLeft:12, fontSize:'0.75rem'}} className="small-btn">Next problem</button>
+          </div>
+
+          <div className="thought-trace">
+            {visibleThoughts.map((t, i) => (
+              <div key={i} className="thought">→ {t}</div>
+            ))}
+            {visibleThoughts.length < thinkingSteps && <div className="thought" style={{opacity:0.5}}>(more steps hidden — increase budget)</div>}
+          </div>
+
+          <div className="metrics">
+            <div className="metric">
+              <div className="val">{thinkingSteps}</div>
+              <div className="lbl">reasoning steps</div>
+            </div>
+            <div className="metric">
+              <div className="val">{accuracy}%</div>
+              <div className="lbl">est. accuracy</div>
+            </div>
+            <div className="metric">
+              <div className="val">${estCost}</div>
+              <div className="lbl">est. cost (this call)</div>
+            </div>
+          </div>
+
+          <div style={{marginTop: 14, display:'flex', gap:8, flexWrap:'wrap'}}>
+            <button className="button button--primary" onClick={allocateMore}>
+              Allocate +6k tokens (more thinking)
+            </button>
+            <button className="button" onClick={resetReasoning}>Reset demo</button>
+          </div>
+          <div style={{fontSize:'0.75rem', color:'var(--muted)', marginTop:8}}>This is the core idea behind o1/o3: the model uses extra compute to explore solution paths internally before answering. Quality scales with the budget you are willing to spend per query.</div>
+        </div>
+      </section>
+
+      <section className="section">
+        <div className="section-header">
+          <Cpu size={22} />
+          <h2>4. Inference at Scale</h2>
+        </div>
+        <p>Once the model exists, serving millions of users cheaply requires heavy optimization: continuous batching, paged attention, quantization, speculative decoding, and clever KV cache management (see the context explainer).</p>
+
+        <div className="scale-sim" style={{marginTop:16}}>
+          <div className="sliders">
+            <div>
+              <label>Batch size (parallel requests) <strong>{batchSize}</strong></label>
+              <input type="range" min="1" max="128" value={batchSize} onChange={e => setBatchSize(parseInt(e.target.value))} />
+            </div>
+            <div>
+              <label>Model size (B params) <strong>{modelSize}</strong></label>
+              <input type="range" min="7" max="405" step="7" value={modelSize} onChange={e => setModelSize(parseInt(e.target.value))} />
+            </div>
+          </div>
+          <div style={{marginTop:16, fontSize:'0.95rem'}}>
+            Effective marginal cost per request at this batch: <strong style={{color:'var(--accent)'}}>${effectiveCost}</strong>
+          </div>
+          <div style={{fontSize:'0.75rem', color:'var(--muted)'}}>Bigger batch = much lower cost per user. This is why OpenAI can offer GPT-4o cheap enough for consumer use.</div>
+        </div>
+      </section>
+
+      <section className="section">
+        <div className="section-header">
+          <TrendingUp size={22} />
+          <h2>5. The Flywheel + Safety Layer</h2>
+        </div>
+        <div className="openai-flywheel">
+          <div className="flywheel-card">
+            <h4>Product → Data</h4>
+            <p>ChatGPT is the largest preference data collector in history. Every thumbs up/down and edit becomes training signal for the next model.</p>
+          </div>
+          <div className="flywheel-card">
+            <h4>Data → Better Models</h4>
+            <p>More (and higher quality) human feedback → stronger post-training → more users trust the product → even more data.</p>
+          </div>
+          <div className="flywheel-card">
+            <h4>Revenue → Compute</h4>
+            <p>API + ChatGPT Plus revenue funds the next giant training run. The loop is the moat.</p>
+          </div>
+          <div className="flywheel-card">
+            <h4>Safety / Policy</h4>
+            <p>Red teaming, model spec, refusals, and usage policies are part of the "product" — they are how OpenAI tries to ship powerful systems responsibly at scale.</p>
+          </div>
+        </div>
+      </section>
+
+      <div className="footer">
+        <div>OpenAI turns research, compute, and user feedback into a continuously improving intelligence product • React + Vite • GitHub Pages</div>
+        <div>leonlzd120000/explain</div>
+      </div>
+    </main>
+  );
+}
+
+
 function App() {
   // Robust hash routing (handles GitHub Pages subpath, query strings, and direct #/git loads)
   const getCurrentHash = () => (window.location.hash || '#/').split('?')[0] || '#/';
@@ -1251,6 +1587,8 @@ function App() {
       document.title = 'The Road to AGI • Explain to me';
     } else if (route === '#/git') {
       document.title = 'How Git Works • Explain to me';
+    } else if (route === '#/openai') {
+      document.title = 'How OpenAI Works • Explain to me';
     }
   }, [route]);
 
@@ -1265,6 +1603,9 @@ function App() {
   }
   if (route === '#/git') {
     return <GitPage />;
+  }
+  if (route === '#/openai') {
+    return <OpenAIPage />;
   }
 
   return <ProjectHub />;
