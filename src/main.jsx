@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
-import { ArrowRight, Zap, Brain, Layers, Target, Sparkles, ExternalLink, ScrollText, Database, Clock, AlertTriangle, SlidersHorizontal, RefreshCw, Mountain, Cpu, TrendingUp, Users, Lightbulb, GitBranch, GitCommit, GitMerge, GitPullRequest, Folder, FileText, RotateCcw, Plus, Minus, Hash, Factory, Shield, Timer, Repeat, Play, Bot, Settings, Link } from 'lucide-react';
+import { ArrowRight, Zap, Brain, Layers, Target, Sparkles, ExternalLink, ScrollText, Database, Clock, AlertTriangle, SlidersHorizontal, RefreshCw, Mountain, Cpu, TrendingUp, Users, Lightbulb, GitBranch, GitCommit, GitMerge, GitPullRequest, Folder, FileText, RotateCcw, Plus, Minus, Hash, Factory, Shield, Timer } from 'lucide-react';
 import './styles.css';
 
 const generatedProjects = [
@@ -21,7 +21,7 @@ const generatedProjects = [
   {
     id: 'agi',
     title: 'The Road to AGI',
-    summary: 'What "general intelligence" really means, how scaling + reasoning gets us closer, the remaining hard problems, and interactive tools to explore the horizon.',
+    summary: 'What \"general intelligence\" really means, how scaling + reasoning gets us closer, the remaining hard problems, and interactive tools to explore the horizon.',
     href: '#/agi',
     tag: 'Frontier AI',
   },
@@ -45,6 +45,13 @@ const generatedProjects = [
     summary: 'The autonomous tool-using loop, skills as self-improving persistent procedures, sub-agent delegation, cross-session memory, profiles, and the multi-platform gateway that lets one agent live everywhere.',
     href: '#/hermes-agent',
     tag: 'AI agents',
+  },
+  {
+    id: 'openclaw',
+    title: 'How OpenClaw Works',
+    summary: 'An open-source precision claw system: mechanical kinematics, multi-modal sensors, real-time control loops, and AI-driven grasp planning with live simulation.',
+    href: '#/openclaw',
+    tag: 'Robotics',
   },
 ];
 
@@ -87,180 +94,1643 @@ function ProjectHub() {
   );
 }
 
-function HermesAgentPage() {
-  const [goal, setGoal] = useState("Research and install a skill that auto-runs git status before any terminal edit");
-  const [skills, setSkills] = useState([
-    { id: 'core', name: 'Core Loop', active: true },
-    { id: 'git', name: 'Git Expert', active: true },
-    { id: 'file', name: 'File Ops', active: true },
-  ]);
-  const [trace, setTrace] = useState([]);
-  const [memory, setMemory] = useState({ profile: 'fe', turns: 0, lastAction: 'init' });
-  const [turn, setTurn] = useState(0);
+function LlmPage() {
+  const [selectedWord, setSelectedWord] = useState(null);
+  const [prompt, setPrompt] = useState("The future of AI is");
+  const [generated, setGenerated] = useState([]);
 
-  const runTurn = () => {
-    const t = turn + 1;
-    const newTrace = [...trace];
-    newTrace.push({ type: 'thought', content: "Turn " + t + ": Planning how to achieve \"" + goal.slice(0, 50) + "...\" with loaded skills" });
-    newTrace.push({ type: 'tool', content: 'terminal: git status --porcelain' });
-    newTrace.push({ type: 'result', content: 'Working tree clean. No uncommitted changes.' });
-    newTrace.push({ type: 'memory', content: 'memory.write: last_git_check = clean, confidence high' });
-    newTrace.push({ type: 'output', content: 'Agent: Goal achievable. No blockers. Ready for next action or clarification.' });
-    setTrace(newTrace);
-    setTurn(t);
-    setMemory(m => ({ ...m, turns: t, lastAction: 'git-check' }));
+  const words = ["The", "future", "of", "AI", "is"];
+  const attentionScores = [0.12, 0.08, 0.31, 0.27, 0.22];
+
+  const handleWordClick = (index) => {
+    setSelectedWord(index === selectedWord ? null : index);
   };
 
-  const installSkill = () => {
-    const newSkill = { id: 'delegation', name: 'Delegation', active: true };
-    if (!skills.find(s => s.id === newSkill.id)) {
-      setSkills(prev => [...prev, newSkill]);
-      setTrace(prev => [...prev, { type: 'skill', content: 'Skill "Delegation" installed. Future turns will consider spawning leaf agents for parallel work.' }]);
+  const simulateGeneration = () => {
+    const nextTokens = ["bright", "uncertain", "shaped", "limitless", "written"];
+    const random = nextTokens[Math.floor(Math.random() * nextTokens.length)];
+    
+    setGenerated(prev => [...prev.slice(-4), random]);
+    
+    // auto clear after some
+    if (generated.length > 5) {
+      setTimeout(() => setGenerated([]), 1200);
     }
   };
 
-  const spawnSubagent = () => {
-    setTrace(prev => [...prev, { type: 'delegation', content: 'Delegated to leaf agent (role=leaf): "scan for similar skills in ~/.hermes". Result merged: 2 new patterns saved to memory.' }]);
-    setMemory(m => ({ ...m, subagents: (m.subagents || 0) + 1 }));
-  };
+  return (
+    <main className="shell">
+      <nav className="project-nav" aria-label="Project navigation">
+        <a href="#/" className="nav-link">All projects</a>
+        <a href="https://github.com/leonlzd120000/explain" className="nav-link">
+          Repository <ExternalLink size={14} />
+        </a>
+      </nav>
 
-  const resetDemo = () => {
-    setTrace([]);
-    setTurn(0);
-    setMemory({ profile: 'fe', turns: 0, lastAction: 'init' });
-  };
+      {/* Hero */}
+      <section className="hero">
+        <div>
+          <p className="eyebrow">Inside the Model</p>
+          <h1>How Large<br />Language Models<br />Work</h1>
+          <p className="lede">
+            Next-token prediction at planetary scale. From raw text to billions of parameters, 
+            here is the visual anatomy of modern AI.
+          </p>
+          <div className="actions">
+            <a href="#architecture" className="button button--primary">
+              Explore the transformer <ArrowRight size={18} />
+            </a>
+            <a href="#attention" className="button">
+              Try attention
+            </a>
+          </div>
+        </div>
+        <div className="token-visual">
+          <div className="neural-bg" />
+          <div className="token-stream">
+            {["The", "quick", "brown", "fox", "jumps", "over", "the", "lazy", "dog"].map((t, i) => (
+              <div key={i} className={`token ${i % 3 === 0 ? 'active' : ''}`}>{t}</div>
+            ))}
+          </div>
+          <div style={{ position: 'absolute', bottom: 32, left: 40, right: 40, fontSize: '0.75rem', color: '#8a877e' }}>
+            Tokens flow left → right. Each becomes a high-dimensional vector.
+          </div>
+        </div>
+      </section>
 
+      {/* Tokens */}
+      <section className="section" id="tokens">
+        <div className="section-header">
+          <Zap size={22} />
+          <h2>1. Tokenization</h2>
+        </div>
+        <p>Text is split into subword tokens using Byte-Pair Encoding. The model never sees characters or whole words — only ~50k learned tokens.</p>
+        
+        <div className="cards">
+          <div className="card">
+            <h3>Byte-Pair Encoding</h3>
+            <p>Common pairs of bytes are merged iteratively. “unhappiness” → [“un”, “happiness”] or finer tokens.</p>
+          </div>
+          <div className="card">
+            <h3>Embedding Table</h3>
+            <p>Each token ID maps to a 4096–8192 dimensional vector. These vectors carry semantic meaning learned during training.</p>
+          </div>
+        </div>
+      </section>
+
+      {/* Architecture */}
+      <section className="section" id="architecture">
+        <div className="section-header">
+          <Layers size={22} />
+          <h2>2. Transformer Decoder</h2>
+        </div>
+        <p>Modern LLMs are decoder-only stacks. Each layer performs self-attention followed by a feed-forward network.</p>
+
+        <div className="transformer">
+          <div className="diagram">
+            <div className="layer">
+              <div className="layer-label">INPUT</div>
+              <div className="layer-title">Token Embeddings</div>
+            </div>
+            <div className="attention">
+              <div style={{ textAlign: 'center', zIndex: 1 }}>
+                <div style={{ fontSize: '0.75rem', color: '#8a877e', marginBottom: 4 }}>MULTI-HEAD</div>
+                <div style={{ fontWeight: 700 }}>Self-Attention</div>
+              </div>
+              <div className="arrow" style={{ position: 'absolute', left: '18%', width: '64px' }} />
+              <div className="arrow" style={{ position: 'absolute', right: '18%', width: '64px', transform: 'rotate(180deg)' }} />
+            </div>
+            <div className="layer">
+              <div className="layer-label">OUTPUT</div>
+              <div className="layer-title">Next Token Logits</div>
+            </div>
+          </div>
+          <div style={{ marginTop: 24, fontSize: '0.85rem', color: '#8a877e', textAlign: 'center' }}>
+            32–128 identical layers • Residual connections • LayerNorm • ~ trillions of FLOPs per forward pass
+          </div>
+        </div>
+      </section>
+
+      {/* Attention Demo */}
+      <section className="section" id="attention">
+        <div className="section-header">
+          <Target size={22} />
+          <h2>3. Attention Mechanism</h2>
+        </div>
+        <p>Attention lets every token “look at” every other token. The model learns which relationships matter most for prediction.</p>
+
+        <div className="attention-demo">
+          <div style={{ marginBottom: 12, fontSize: '0.875rem', color: '#8a877e' }}>Click any word to see its attention distribution</div>
+          
+          <div className="prompt">
+            {words.map((word, index) => (
+              <div 
+                key={index} 
+                className={`word ${selectedWord === index ? 'selected' : ''}`}
+                onClick={() => handleWordClick(index)}
+              >
+                {word}
+              </div>
+            ))}
+          </div>
+          <div style={{ fontSize: '0.75rem', color: '#8a877e', marginBottom: 8 }}>Attention weights from selected token</div>
+          <div className="heatmap">
+            {attentionScores.map((score, i) => (
+              <div 
+                key={i} 
+                className={`heat ${score > 0.25 ? 'high' : ''}`}
+                data-score={(score * 100).toFixed(0) + '%'}
+                style={{ opacity: selectedWord === null ? 0.6 : (selectedWord === i ? 1 : 0.35 + score * 0.9) }}
+              />
+            ))}
+          </div>
+          <div style={{ marginTop: 12, fontSize: '0.75rem', color: 'var(--muted)' }}>
+            Higher opacity = stronger attention. “of” and “AI” receive the most weight here.
+          </div>
+        </div>
+      </section>
+
+      {/* Generation Simulator */}
+      <section className="section">
+        <div className="section-header">
+          <Sparkles size={22} />
+          <h2>4. Next-Token Prediction</h2>
+        </div>
+        <p>At inference the model outputs a probability distribution over the vocabulary. We sample the next token and repeat.</p>
+
+        <div className="generator">
+          <div className="input-row">
+            <input 
+              value={prompt} 
+              onChange={(e) => setPrompt(e.target.value)} 
+              placeholder="Enter prompt..." 
+            />
+            <button className="button button--primary" onClick={simulateGeneration}>
+              Sample next token
+            </button>
+          </div>
+          <div className="tokens-output">
+            {prompt.split(' ').map((t, i) => (
+              <div key={i} className="token" style={{ background: 'rgba(79,156,255,0.1)', borderColor: 'rgba(79,156,255,0.3)', color: '#4f9cff' }}>{t}</div>
+            ))}
+            {generated.map((token, i) => (
+              <div key={i} className="gen-token">{token}</div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Scale Stats */}
+      <section className="section">
+        <div className="section-header">
+          <Brain size={22} />
+          <h2>5. Why Scale Wins</h2>
+        </div>
+        
+        <div className="stats">
+          <div className="stat">
+            <div className="stat-value">405B</div>
+            <div className="stat-label">Parameters in Llama 3.1</div>
+          </div>
+          <div className="stat">
+            <div className="stat-value">15T</div>
+            <div className="stat-label">Tokens used in training</div>
+          </div>
+          <div className="stat">
+            <div className="stat-value">128K</div>
+            <div className="stat-label">Context length (tokens)</div>
+          </div>
+          <div className="stat">
+            <div className="stat-value">~0.3s</div>
+            <div className="stat-label">Time to first token (typical)</div>
+          </div>
+        </div>
+      </section>
+
+      <div className="footer">
+        <div>Built for clarity • React + Vite • GitHub Pages</div>
+        <div>leonlzd120000/explain</div>
+      </div>
+    </main>
+  );
+}
+
+function ContextPage() {
+  // Context Window Simulator
+  const [windowSize, setWindowSize] = useState(32);
+  const [fullContext, setFullContext] = useState("The quick brown fox jumps over the lazy dog. Then it runs through the forest and meets a wise owl who tells stories about ancient trees and hidden streams. The fox listens carefully, remembering every detail for its journey ahead.");
+  const [selectedPos, setSelectedPos] = useState(null);
+  
+  const tokens = fullContext.trim().split(/\s+/).slice(0, 60); // cap for demo
+  const visibleTokens = tokens.slice(Math.max(0, tokens.length - windowSize));
+  const totalTokens = tokens.length;
+  
+  // KV Cache demo
+  const [kvStep, setKvStep] = useState(0);
+  const [generatedTokens, setGeneratedTokens] = useState([]);
+  const promptTokens = ["User:", "Explain", "context", "in", "LLMs", "to", "me"];
+  const sampleNext = ["Context", "is", "the", "model's", "working", "memory", "window", "that", "limits", "what", "it", "can", "attend", "to", "simultaneously"];
+  
+  const handleGenerate = () => {
+    if (kvStep === 0) {
+      setKvStep(1);
+    } else {
+      const next = sampleNext[Math.min(kvStep - 1, sampleNext.length - 1)];
+      setGeneratedTokens(prev => [...prev, next]);
+      setKvStep(prev => prev + 1);
+    }
+  };
+  const resetKV = () => {
+    setKvStep(0);
+    setGeneratedTokens([]);
+  };
+  
+  // Truncation / RAG sim
+  const [userText, setUserText] = useState("In a distant galaxy, a young explorer named Elara discovered an ancient artifact that could rewrite the laws of physics. She shared this with her crew aboard the starship Voyager, but the message got garbled over the long distance. The crew had to piece together fragments from previous transmissions while also recalling their training from years ago. The decision they made would determine the fate of their mission and perhaps the entire federation.");
+  const approxTokens = (text) => Math.ceil(text.split(/\s+/).length * 1.33);
+  const currentTokenCount = approxTokens(userText);
+  const maxDemoWindow = 48;
+  const isOver = currentTokenCount > maxDemoWindow;
+  const truncated = isOver ? userText.split(/\s+/).slice(0, maxDemoWindow).join(' ') + ' ... [truncated]' : userText;
+  const [strategy, setStrategy] = useState('truncate');
+  const effectiveText = strategy === 'truncate' ? truncated : userText.split(/\s+/).slice(-maxDemoWindow).join(' ') + ' ... [kept recent]';
+  
+  const handleStrategy = (s) => setStrategy(s);
+  
+  // Attention demo
+  const [focusToken, setFocusToken] = useState(12);
+  const contextPositions = Array.from({length: 20}, (_, i) => `T${i+1}`);
+  const getAttention = (pos) => {
+    const dist = Math.abs(pos - focusToken);
+    let att = Math.max(0.05, 0.9 - dist * 0.08);
+    if (dist > 5 && dist < 12) att *= 0.6; // lost in middle
+    return att;
+  };
+  
+  // Set document title
   useEffect(() => {
-    document.title = 'How Hermes Agent Works • Explain to me';
+    document.title = 'How Context Works in LLMs • Explain to me';
   }, []);
 
   return (
-    <main className="shell hermes-page">
+    <main className="shell context-page">
       <nav className="project-nav" aria-label="Project navigation">
         <a href="#/" className="nav-link">All projects</a>
-        <a href="#/git" className="nav-link">Git</a>
+        <a href="#/large-language-models" className="nav-link">LLM Basics</a>
+        <a href="https://github.com/leonlzd120000/explain" className="nav-link">
+          Repository <ExternalLink size={14} />
+        </a>
+      </nav>
+
+      {/* Hero */}
+      <section className="hero context-hero">
+        <div>
+          <p className="eyebrow">Working Memory</p>
+          <h1>How Context<br />Works in LLMs</h1>
+          <p className="lede">
+            The context window is the model's entire field of view. Everything outside it is invisible — no matter how important.
+            Here is exactly how that limit is enforced and worked around.
+          </p>
+          <div className="actions">
+            <a href="#window" className="button button--primary">
+              Explore the window <ScrollText size={18} />
+            </a>
+            <a href="#kv" className="button">
+              See the KV cache
+            </a>
+          </div>
+        </div>
+        <div className="context-visual">
+          <div className="tape">
+            {tokens.slice(0,12).map((t,i) => <div key={i} className="tape-token">{t}</div>)}
+            <div className="tape-window" style={{ width: `${Math.min(70, (windowSize / totalTokens) * 100)}%` }} />
+          </div>
+          <div className="visual-label">The sliding window over history. Only tokens inside are visible to attention.</div>
+        </div>
+      </section>
+
+      {/* 1. The Window */}
+      <section className="section" id="window">
+        <div className="section-header">
+          <SlidersHorizontal size={22} />
+          <h2>1. The Context Window</h2>
+        </div>
+        <p>Every forward pass, the model receives a fixed-length sequence of tokens (the context). Tokens beyond the limit are dropped before the model even sees them. Modern models range from 4k to over 1M tokens.</p>
+        
+        <div className="window-sim">
+          <div className="controls">
+            <label>Window size: <strong>{windowSize}</strong> tokens (demo scale)</label>
+            <input 
+              type="range" 
+              min="4" 
+              max="64" 
+              value={windowSize} 
+              onChange={(e) => setWindowSize(parseInt(e.target.value))}
+            />
+            <div className="token-count">Full history: {totalTokens} tokens • Visible to model: {visibleTokens.length}</div>
+          </div>
+          
+          <div className="context-tape">
+            {tokens.map((token, idx) => {
+              const isVisible = idx >= tokens.length - windowSize;
+              return (
+                <div 
+                  key={idx} 
+                  className={`tape-token ${isVisible ? 'in-window' : 'out-of-window'}`}
+                  onClick={() => setSelectedPos(idx)}
+                >
+                  {token}
+                  {selectedPos === idx && <span className="sel-dot" />}
+                </div>
+              );
+            })}
+          </div>
+          <div className="legend">
+            <span className="leg in">Inside window (attended)</span>
+            <span className="leg out">Dropped (invisible)</span>
+          </div>
+          <button className="button" onClick={() => { 
+            setFullContext(fullContext + " The story continues with new details about the hidden valley and its secrets."); 
+            setSelectedPos(null); 
+          }}>
+            Append more text (grow history)
+          </button>
+        </div>
+      </section>
+
+      {/* 2. KV Cache */}
+      <section className="section" id="kv">
+        <div className="section-header">
+          <Database size={22} />
+          <h2>2. KV Cache: The Efficiency Trick</h2>
+        </div>
+        <p>Attention is O(n²). Recomputing keys and values for every previous token on every new generation step would be catastrophically slow. The KV cache stores the K and V projections from previous tokens so the model only computes the new token's Q/K/V.</p>
+        
+        <div className="kv-demo">
+          <div className="kv-header">
+            <div>Step: <strong>{kvStep === 0 ? 'Ready to prefill' : kvStep}</strong></div>
+            <div className="kv-actions">
+              <button className="button button--primary" onClick={handleGenerate}>
+                {kvStep === 0 ? 'Prefill context (compute all KV)' : 'Generate next token'}
+              </button>
+              <button className="button" onClick={resetKV}><RefreshCw size={14} /> Reset</button>
+            </div>
+          </div>
+          
+          <div className="token-timeline">
+            {promptTokens.map((tok, i) => (
+              <div key={`p${i}`} className={`tkn ${kvStep > 0 ? 'cached' : ''}`}>
+                {tok}
+                {kvStep > 0 && <div className="cache-badge">KV cached</div>}
+              </div>
+            ))}
+            {generatedTokens.map((tok, i) => (
+              <div key={`g${i}`} className="tkn gen">
+                {tok}
+                <div className="cache-badge">just computed</div>
+              </div>
+            ))}
+          </div>
+          
+          <div className="cost-bar">
+            <div>Compute cost this step:</div>
+            <div className="bar">
+              <div className="fill" style={{width: kvStep === 0 ? '100%' : '12%'}} />
+            </div>
+            <div className="note">{kvStep === 0 ? 'Full prefill: all tokens' : 'Only new token + attend to cache (massive saving)'}</div>
+          </div>
+        </div>
+      </section>
+
+      {/* 3. Attention Dilution */}
+      <section className="section">
+        <div className="section-header">
+          <Target size={22} />
+          <h2>3. Attention Dilution &amp; "Lost in the Middle"</h2>
+        </div>
+        <p>Even inside the window, not all tokens are equal. Attention tends to focus on the beginning and the very end. Information in the middle of a long context is often ignored — a well-documented failure mode.</p>
+        
+        <div className="attention-sim">
+          <div style={{marginBottom: '12px', fontSize:'0.875rem', color:'var(--muted)'}}>Click a position to set the "query" (usually the latest token). Watch attention weights.</div>
+          <div className="pos-tokens">
+            {contextPositions.map((t, i) => (
+              <div 
+                key={i} 
+                className={`pos-token ${i === focusToken ? 'focus' : ''}`}
+                onClick={() => setFocusToken(i)}
+                style={{ opacity: 0.6 + getAttention(i) * 0.4 }}
+              >
+                {t}
+              </div>
+            ))}
+          </div>
+          <div className="att-bars">
+            {contextPositions.map((_, i) => {
+              const a = getAttention(i);
+              return <div key={i} className="att-bar" style={{height: `${a * 80 + 12}px`, background: i===focusToken ? 'var(--accent)' : '#4f9cff'}} title={`${(a*100).toFixed(0)}%`} />
+            })}
+          </div>
+          <p style={{fontSize:'0.8rem', color:'var(--muted)', marginTop:8}}>Notice the dip in the middle positions even when the window is "full".</p>
+        </div>
+      </section>
+
+      {/* 4. When the Window Fills */}
+      <section className="section">
+        <div className="section-header">
+          <AlertTriangle size={22} />
+          <h2>4. When the Window Fills Up</h2>
+        </div>
+        <p>Paste or edit text below. The demo window is artificially small (48 tokens) to make the effect obvious. In reality you hit the wall at 128k+ but the same problem appears at scale.</p>
+        
+        <div className="overflow-demo">
+          <textarea 
+            value={userText} 
+            onChange={e => setUserText(e.target.value)}
+            rows={5}
+            className="context-input"
+          />
+          <div className="count-row">
+            <span>Approx tokens: <strong className={isOver ? 'over' : ''}>{currentTokenCount}</strong> / {maxDemoWindow} demo limit</span>
+            {isOver && <span className="over-label">OVER LIMIT</span>}
+          </div>
+          
+          <div className="strategies">
+            <button onClick={() => handleStrategy('truncate')} className={`strat-btn ${strategy==='truncate' ? 'active' : ''}`}>Truncate oldest (common default)</button>
+            <button onClick={() => handleStrategy('recent')} className={`strat-btn ${strategy==='recent' ? 'active' : ''}`}>Keep only recent (recency bias)</button>
+          </div>
+          
+          <div className="result-context">
+            <div className="label">What the model actually sees:</div>
+            <div className="result-text">{effectiveText}</div>
+          </div>
+        </div>
+      </section>
+
+      {/* 5. Escaping */}
+      <section className="section">
+        <div className="section-header">
+          <Brain size={22} />
+          <h2>5. Escaping the Window</h2>
+        </div>
+        <div className="escape-grid">
+          <div className="escape-card">
+            <h4>RAG (Retrieval)</h4>
+            <p>Don't put everything in context. Retrieve only the relevant chunks from a vector database at query time and stuff just those into the window.</p>
+          </div>
+          <div className="escape-card">
+            <h4>Memory / Agents</h4>
+            <p>External memory stores (vector DBs, graphs, summaries written to files) that the model can read/write via tools. The LLM only holds a tiny active scratchpad.</p>
+          </div>
+          <div className="escape-card">
+            <h4>Context Compression</h4>
+            <p>Models or separate summarizers that compress previous turns into fewer tokens while preserving key facts. Used in long chat sessions.</p>
+          </div>
+          <div className="escape-card">
+            <h4>Long-Context Training</h4>
+            <p>Techniques like YaRN, NTK-aware scaling, Ring Attention, and continued pretraining on longer sequences push the native window to millions of tokens.</p>
+          </div>
+        </div>
+      </section>
+
+      {/* Real numbers */}
+      <section className="section">
+        <div className="section-header">
+          <Clock size={22} />
+          <h2>Context Lengths in the Wild (2025)</h2>
+        </div>
+        <div className="stats context-stats">
+          <div className="stat"><div className="stat-value">128K</div><div className="stat-label">GPT-4o / Claude 3.5</div></div>
+          <div className="stat"><div className="stat-value">200K</div><div className="stat-label">Claude 3 Opus</div></div>
+          <div className="stat"><div className="stat-value">1M+</div><div className="stat-label">Gemini 1.5 / Llama 3.1 405B variants</div></div>
+          <div className="stat"><div className="stat-value">10M</div><div className="stat-label">Experimental (research)</div></div>
+        </div>
+        <p style={{fontSize:'0.8rem', marginTop:'16px', color:'var(--muted)'}}>Larger windows are impressive but quadratic cost and "lost in middle" mean engineering workarounds are still essential.</p>
+      </section>
+
+      <div className="footer">
+        <div>Context is the hidden constraint behind every LLM interaction • React + Vite • GitHub Pages</div>
+        <div>leonlzd120000/explain</div>
+      </div>
+    </main>
+  );
+}
+
+function AgiPage() {
+  // Scaling simulator
+  const [compute, setCompute] = useState(60);
+  const [data, setData] = useState(55);
+  const [algo, setAlgo] = useState(45);
+
+  const emergence = Math.round(
+    (compute * 0.4 + data * 0.35 + algo * 0.25) / 1.5
+  );
+  const isEmergent = emergence > 75;
+
+  // Capability ladder
+  const domains = [
+    { name: 'Math & Reasoning', current: 85, agi: 98 },
+    { name: 'Coding', current: 78, agi: 95 },
+    { name: 'Science Discovery', current: 62, agi: 92 },
+    { name: 'Creative Work', current: 70, agi: 88 },
+    { name: 'Long-horizon Planning', current: 35, agi: 96 },
+    { name: 'Social & Emotional', current: 48, agi: 85 },
+  ];
+
+  const [year, setYear] = useState(2025);
+  const progress = Math.min(100, Math.max(0, (year - 2020) * 8 + (emergence - 50) / 2));
+
+  // Agent failure demo
+  const [agentType, setAgentType] = useState('narrow');
+  const task = "Plan a crewed mission to Mars including life support, launch windows, and contingencies.";
+  const agentOutputs = {
+    narrow: "I can look up current rocket specs and Mars distance. For the full plan you will need a human team.",
+    cot: "Step 1: Distance is 225M km average. Step 2: Use Starship-class vehicle. Step 3: ... [stops at high-level, cannot simulate 2-year mission dynamics or unknown failure modes]",
+    agi: "Full end-to-end plan generated with 47 contingency branches, real-time simulation of closed-loop life support, economic model for 15-year program, and self-updating risk register. Ready to execute or iterate."
+  };
+
+  // Definition spectrum
+  const [breadth, setBreadth] = useState(70);
+  const [depth, setDepth] = useState(55);
+  const agiScore = Math.round((breadth + depth) / 2);
+
+  useEffect(() => {
+    document.title = 'The Road to AGI • Explain to me';
+  }, []);
+
+  return (
+    <main className="shell agi-page">
+      <nav className="project-nav" aria-label="Project navigation">
+        <a href="#/" className="nav-link">All projects</a>
+        <a href="#/llm-context" className="nav-link">Context</a>
+        <a href="#/large-language-models" className="nav-link">LLM Basics</a>
+        <a href="https://github.com/leonlzd120000/explain" className="nav-link">
+          Repository <ExternalLink size={14} />
+        </a>
+      </nav>
+
+      {/* Hero */}
+      <section className="hero agi-hero">
+        <div>
+          <p className="eyebrow">The Horizon</p>
+          <h1>The Road to<br />Artificial General<br />Intelligence</h1>
+          <p className="lede">
+            AGI is not just "better AI". It is the point where a single system can match or exceed the full range of human intellectual capability across almost any domain, and keep improving itself.
+          </p>
+          <div className="actions">
+            <a href="#simulator" className="button button--primary">
+              Explore the emergence simulator <TrendingUp size={18} />
+            </a>
+            <a href="#gaps" className="button">
+              See the remaining gaps
+            </a>
+          </div>
+        </div>
+        <div className="horizon-visual">
+          <div className="ladder">
+            {domains.slice(0, 3).map((d, i) => (
+              <div key={i} className="ladder-rung">
+                <div className="label">{d.name}</div>
+                <div className="bar"><div className="fill" style={{ width: `${d.current}%` }} /></div>
+              </div>
+            ))}
+            <div className="agi-line" style={{ left: `${progress}%` }}>
+              <Mountain size={18} /> AGI horizon
+            </div>
+          </div>
+          <div className="visual-label">Current frontier systems vs. the generalist threshold (drag year to project)</div>
+        </div>
+      </section>
+
+      {/* Simulator */}
+      <section className="section" id="simulator">
+        <div className="section-header">
+          <TrendingUp size={22} />
+          <h2>1. The Emergence Simulator</h2>
+        </div>
+        <p>Most progress comes from scaling three ingredients. Move the sliders. Watch how "general" capability can suddenly jump when the combination crosses a threshold.</p>
+
+        <div className="simulator">
+          <div className="sliders">
+            <div>
+              <label>Compute (FLOPs &amp; chips) <strong>{compute}</strong></label>
+              <input type="range" min="20" max="100" value={compute} onChange={e => setCompute(+e.target.value)} />
+            </div>
+            <div>
+              <label>Data (tokens &amp; quality) <strong>{data}</strong></label>
+              <input type="range" min="20" max="100" value={data} onChange={e => setData(+e.target.value)} />
+            </div>
+            <div>
+              <label>Algorithmic novelty <strong>{algo}</strong></label>
+              <input type="range" min="20" max="100" value={algo} onChange={e => setAlgo(+e.target.value)} />
+            </div>
+          </div>
+          <div className="emergence">
+            <div className="score">{emergence}</div>
+            <div className="label">Emergence score</div>
+            <div className={`status ${isEmergent ? 'emergent' : ''}`}>
+              {isEmergent ? 'Emergent generalist behavior likely' : 'Still mostly narrow / brittle'}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Capability Ladder */}
+      <section className="section">
+        <div className="section-header">
+          <Mountain size={22} />
+          <h2>2. The Capability Ladder</h2>
+        </div>
+        <p>AGI is not one number. It is crossing the threshold across many domains at once. Adjust the "year" slider to see projected progress.</p>
+
+        <div className="ladder-controls">
+          <label>Projected year: <strong>{year}</strong></label>
+          <input type="range" min="2020" max="2035" value={year} onChange={e => setYear(+e.target.value)} />
+        </div>
+        <div className="domain-grid">
+          {domains.map((d, i) => {
+            const currentHeight = Math.min(100, d.current + (year - 2025) * 2.5);
+            return (
+              <div key={i} className="domain">
+                <div className="name">{d.name}</div>
+                <div className="bars">
+                  <div className="bar current" style={{ width: `${Math.min(100, currentHeight)}%` }}>
+                    <span>Now</span>
+                  </div>
+                  <div className="bar agi" style={{ width: `${d.agi}%` }}>
+                    <span>AGI</span>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* Agent Gaps */}
+      <section className="section" id="gaps">
+        <div className="section-header">
+          <Cpu size={22} />
+          <h2>3. Where Current Systems Still Fail</h2>
+        </div>
+        <p>Even the best models today are powerful tools or impressive reasoners on short horizons. True generality requires reliable long-term agency, robust world models, and open-ended self-improvement.</p>
+
+        <div className="agent-demo">
+          <div className="task">{task}</div>
+          <div className="types">
+            {['narrow', 'cot', 'agi'].map(t => (
+              <button key={t} className={`type-btn ${agentType === t ? 'active' : ''}`} onClick={() => setAgentType(t)}>
+                {t === 'narrow' ? 'Narrow Tool Use' : t === 'cot' ? 'Chain-of-Thought' : 'Hypothetical AGI'}
+              </button>
+            ))}
+          </div>
+          <div className="output">{agentOutputs[agentType]}</div>
+        </div>
+      </section>
+
+      {/* Definition Spectrum */}
+      <section className="section">
+        <div className="section-header">
+          <Lightbulb size={22} />
+          <h2>4. The AGI Definition Spectrum</h2>
+        </div>
+        <p>People argue about the definition because AGI lives on two axes: breadth (how many domains) and depth (how expert-level in each). Drag to place "today's frontier" and see the score.</p>
+
+        <div className="spectrum">
+          <div>
+            <label>Breadth (domains) {breadth}</label>
+            <input type="range" min="30" max="100" value={breadth} onChange={e => setBreadth(+e.target.value)} />
+          </div>
+          <div>
+            <label>Depth (expertise) {depth}</label>
+            <input type="range" min="30" max="100" value={depth} onChange={e => setDepth(+e.target.value)} />
+          </div>
+          <div className="agi-score">
+            AGI proximity score: <strong>{agiScore}</strong>/100
+            {agiScore > 85 && <span className="note"> — in the ballpark of many working definitions</span>}
+          </div>
+        </div>
+      </section>
+
+      {/* What changes */}
+      <section className="section">
+        <div className="section-header">
+          <Users size={22} />
+          <h2>5. What Actually Changes at AGI</h2>
+        </div>
+        <div className="changes-grid">
+          <div className="change-card">
+            <h4>Before (Current AI)</h4>
+            <ul>
+              <li>Powerful but narrow specialists</li>
+              <li>Requires heavy human scaffolding</li>
+              <li>Plateaus without new data/compute</li>
+            </ul>
+          </div>
+          <div className="change-card">
+            <h4>At AGI</h4>
+            <ul>
+              <li>One system can do research, engineering, strategy</li>
+              <li>Can run long autonomous projects</li>
+              <li>Can improve its own algorithms</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <div className="footer">
+        <div>AGI is the next phase transition in intelligence, not just another model release • React + Vite • GitHub Pages</div>
+        <div>leonlzd120000/explain</div>
+      </div>
+    </main>
+  );
+}
+
+function GitPage() {
+  // Live commit graph + HEAD
+  const [commits, setCommits] = useState([
+    { id: 'a1b2c3', msg: 'Initial commit', parents: [], ts: '2025-01-01' },
+    { id: 'd4e5f6', msg: 'Add README', parents: ['a1b2c3'], ts: '2025-01-02' },
+    { id: 'g7h8i9', msg: 'Fix bug in parser', parents: ['d4e5f6'], ts: '2025-01-03' },
+  ]);
+  const [head, setHead] = useState('g7h8i9');
+  const [branches, setBranches] = useState({ main: 'g7h8i9' });
+  const [currentBranch, setCurrentBranch] = useState('main');
+
+  // Staging area simulator
+  const [workingDir, setWorkingDir] = useState({
+    'README.md': '# Project\n\nHello world',
+    'src/app.js': 'console.log("hello")',
+    'package.json': '{ "name": "demo" }'
+  });
+  const [staged, setStaged] = useState({});
+  const [commitMsg, setCommitMsg] = useState('Update files');
+
+  // For merge / conflict demo
+  const [showConflict, setShowConflict] = useState(false);
+  const [conflictResolution, setConflictResolution] = useState(null);
+
+  // Reflog (time travel)
+  const [reflog, setReflog] = useState([
+    { action: 'commit', id: 'g7h8i9', msg: 'Fix bug in parser' },
+    { action: 'commit', id: 'd4e5f6', msg: 'Add README' },
+    { action: 'commit', id: 'a1b2c3', msg: 'Initial commit' },
+  ]);
+
+  const currentHeadCommit = commits.find(c => c.id === head) || commits[commits.length-1];
+  const graph = [...commits].reverse(); // newest at top for visual
+
+  const editFile = (filename) => {
+    const current = workingDir[filename] || '';
+    const newContent = current + '\n// edit at ' + new Date().toLocaleTimeString();
+    setWorkingDir(prev => ({ ...prev, [filename]: newContent }));
+  };
+
+  const stageFile = (filename) => {
+    const content = workingDir[filename];
+    setStaged(prev => ({ ...prev, [filename]: content }));
+  };
+
+  const unstageFile = (filename) => {
+    setStaged(prev => {
+      const copy = { ...prev };
+      delete copy[filename];
+      return copy;
+    });
+  };
+
+  const doCommit = () => {
+    if (Object.keys(staged).length === 0) return;
+    const newId = Math.random().toString(16).slice(2, 8);
+    const newCommit = {
+      id: newId,
+      msg: commitMsg || 'Update files',
+      parents: [head],
+      ts: new Date().toISOString().split('T')[0]
+    };
+    setCommits(prev => [...prev, newCommit]);
+    setHead(newId);
+    setBranches(prev => ({ ...prev, [currentBranch]: newId }));
+    setReflog(prev => [{ action: 'commit', id: newId, msg: newCommit.msg }, ...prev]);
+    setStaged({});
+    setCommitMsg('Update files');
+  };
+
+  const createBranch = (name) => {
+    if (branches[name]) return;
+    setBranches(prev => ({ ...prev, [name]: head }));
+  };
+
+  const checkout = (branchName) => {
+    const target = branches[branchName];
+    if (!target) return;
+    setCurrentBranch(branchName);
+    setHead(target);
+  };
+
+  const simulateMerge = () => {
+    // Simple conflict demo: create a feature branch with conflicting edit on same file
+    const featureHead = head;
+    const conflictFile = 'src/app.js';
+    
+    // Simulate feature branch change
+    const featureContent = (workingDir[conflictFile] || '') + '\n// feature: add feature X';
+    
+    // Current (main) also edited
+    const mainContent = (workingDir[conflictFile] || '') + '\n// main: add logging';
+    
+    setShowConflict(true);
+    setWorkingDir(prev => ({ ...prev, [conflictFile]: mainContent })); // pretend main has change
+    setStaged(prev => ({ ...prev, [conflictFile]: mainContent }));
+    
+    // On merge click it will show resolver
+  };
+
+  const resolveConflict = (choice) => {
+    const conflictFile = 'src/app.js';
+    let resolvedContent = '';
+    if (choice === 'ours') resolvedContent = workingDir[conflictFile] || '';
+    else resolvedContent = (workingDir[conflictFile] || '') + '\n// resolved with theirs';
+    
+    setWorkingDir(prev => ({ ...prev, [conflictFile]: resolvedContent }));
+    setStaged(prev => ({ ...prev, [conflictFile]: resolvedContent }));
+    setShowConflict(false);
+    setConflictResolution(choice);
+    
+    // Auto-commit the merge
+    const newId = Math.random().toString(16).slice(2, 8);
+    const newCommit = { id: newId, msg: `Merge branch 'feature'`, parents: [head, 'feature-sim'], ts: new Date().toISOString().split('T')[0] };
+    setCommits(prev => [...prev, newCommit]);
+    setHead(newId);
+    setReflog(prev => [{ action: 'merge', id: newId, msg: 'Merge branch feature' }, ...prev]);
+  };
+
+  const resetToReflog = (entryId) => {
+    setHead(entryId);
+    setReflog(prev => [{ action: 'reset --hard', id: entryId, msg: 'Hard reset to ' + entryId }, ...prev]);
+  };
+
+  const gitCatFile = (commitId) => {
+    const c = commits.find(c => c.id === commitId);
+    if (!c) return 'object not found';
+    return `commit ${commitId}\nAuthor: Demo User\nDate: ${c.ts}\n\n    ${c.msg}\n\nparents: ${c.parents.join(', ') || 'none'}`;
+  };
+
+  // Live content-addressable hash demo — the heart of how .git actually stores everything
+  const [blobContent, setBlobContent] = useState('print("hello from git internals")');
+  const [storedBlobs, setStoredBlobs] = useState([
+    { hash: 'e69de29bb2d1d6434b8b29ae775ad8c2e48c5391', type: 'blob', content: 'hello world example' }
+  ]);
+
+  const computeGitHash = (content) => {
+    // Educational simulation of Git's content-addressable core.
+    // Real git: SHA-1( "blob " + len + "\0" + content ). Here we guarantee: identical content → identical "address".
+    const header = `blob ${content.length}\0`;
+    const full = header + content;
+    let h = 2166136261;
+    for (let i = 0; i < full.length; i++) {
+      h ^= full.charCodeAt(i);
+      h += (h << 1) + (h << 4) + (h << 7) + (h << 8) + (h << 24);
+    }
+    const hex = (h >>> 0).toString(16).padStart(8, '0');
+    return (hex + hex + hex + hex + hex).slice(0, 40); // 40-char fake SHA-1 look
+  };
+
+  const storeBlob = () => {
+    const h = computeGitHash(blobContent);
+    const exists = storedBlobs.some(o => o.hash === h);
+    if (!exists) {
+      setStoredBlobs(prev => [...prev, { hash: h, type: 'blob', content: blobContent }]);
+    }
+  };
+
+  const inspectObject = (obj) => {
+    if (obj.type === 'commit') {
+      alert(gitCatFile(obj.hash));
+    } else {
+      alert(`blob ${obj.hash}\n\n${obj.content}`);
+    }
+  };
+
+  useEffect(() => {
+    document.title = 'How Git Works • Explain to me';
+  }, []);
+
+  return (
+    <main className="shell git-page">
+      <nav className="project-nav" aria-label="Project navigation">
+        <a href="#/" className="nav-link">All projects</a>
         <a href="#/agi" className="nav-link">AGI</a>
         <a href="https://github.com/leonlzd120000/explain" className="nav-link">
           Repository <ExternalLink size={14} />
         </a>
       </nav>
 
-      <section className="hero hermes-hero">
+      {/* Hero */}
+      <section className="hero git-hero">
         <div>
-          <p className="eyebrow">Self-Improving Agent</p>
-          <h1>How Hermes<br />Agent Works</h1>
+          <p className="eyebrow">Distributed Version Control</p>
+          <h1>How Git<br />Works</h1>
           <p className="lede">
-            An autonomous agent that lives in your terminal and chat apps. It does not just answer — it uses tools, loads skills that persist across sessions, delegates to sub-agents, and gets better the more you use it.
+            Git is a content-addressable filesystem with a DAG of commits, an index (staging area), and lightweight branches. Everything is a hash. History is immutable. The .git directory is the entire repository.
           </p>
           <div className="actions">
-            <a href="#loop" className="button button--primary">
-              Play the live loop <Repeat size={18} />
+            <a href="#graph" className="button button--primary">
+              Play with the commit graph <GitBranch size={18} />
             </a>
-            <a href="#skills" className="button">
-              See how skills work
+            <a href="#staging" className="button">
+              Stage &amp; commit
             </a>
           </div>
         </div>
-        <div className="hermes-visual">
-          <div className="loop-diagram">
-            <div className="loop-step">Prompt + Skills + Memory</div>
-            <div className="arrow">→</div>
-            <div className="loop-step">LLM + Tool Schemas</div>
-            <div className="arrow">→</div>
-            <div className="loop-step">Dispatch &amp; Execute</div>
-            <div className="arrow">→</div>
-            <div className="loop-step">Update Memory + Trace</div>
-            <div className="loop-step" style={{background: 'var(--accent)', color: '#0a0b0f'}}>Repeat</div>
-          </div>
-          <div style={{fontSize: '0.75rem', color: 'var(--muted)', marginTop: 12}}>The loop that makes the agent improve itself over time.</div>
-        </div>
-      </section>
-
-      <section className="section" id="loop">
-        <div className="section-header">
-          <Repeat size={22} />
-          <h2>1. The Live Agent Loop (Signature Interactive)</h2>
-        </div>
-        <p>Watch the core loop in action. Edit the goal, run turns, install skills, and delegate. Every step mutates the trace and memory exactly like the real system.</p>
-
-        <div className="loop-sim">
-          <div className="goal-row">
-            <input 
-              value={goal} 
-              onChange={(e) => setGoal(e.target.value)} 
-              placeholder="Describe a goal for the agent..." 
-            />
-            <button className="button button--primary" onClick={runTurn}>
-              <Play size={16} /> Run Turn
-            </button>
-            <button className="button" onClick={installSkill}>Install "Delegation" Skill</button>
-            <button className="button" onClick={spawnSubagent}>Spawn Subagent</button>
-            <button className="button" onClick={resetDemo}>Reset</button>
-          </div>
-
-          <div className="skills-row">
-            {skills.map(s => (
-              <span key={s.id} className={"skill-chip " + (s.active ? 'active' : '')}>{s.name}</span>
-            ))}
-          </div>
-
-          <div className="trace">
-            {trace.length === 0 && <div style={{color:'var(--muted)', fontSize:'0.9rem'}}>Trace is empty. Click "Run Turn" to start the agent thinking.</div>}
-            {trace.map((step, i) => (
-              <div key={i} className={"trace-step " + step.type}>
-                <span className="step-label">{step.type}</span> {step.content}
+        <div className="git-visual">
+          <div className="mini-graph">
+            {graph.slice(0, 4).map((c, i) => (
+              <div key={i} className={`mini-commit ${c.id === head ? 'head' : ''}`}>
+                {c.id.slice(0,6)} <span className="mini-msg">{c.msg}</span>
               </div>
             ))}
           </div>
+          <div className="visual-label">A tiny slice of the commit DAG. HEAD points at the tip of the current branch.</div>
+        </div>
+      </section>
 
-          <div className="memory-panel">
-            <strong>Persistent Memory (cross-session)</strong>
-            <pre>{JSON.stringify(memory, null, 2)}</pre>
-            <div style={{fontSize:'0.75rem', color:'var(--muted)'}}>This state survives /reset and new sessions when using the memory provider.</div>
+      {/* 1. Commit Graph */}
+      <section className="section" id="graph">
+        <div className="section-header">
+          <GitCommit size={22} />
+          <h2>1. The Commit Graph (DAG)</h2>
+        </div>
+        <p>Commits are snapshots. Each commit points to its parent(s). The graph is append-only. HEAD is just a pointer.</p>
+
+        <div className="commit-graph">
+          {graph.map((c, idx) => (
+            <div key={c.id} className={`commit-node ${c.id === head ? 'is-head' : ''}`}>
+              <div className="commit-id">{c.id}</div>
+              <div className="commit-msg">{c.msg}</div>
+              <div className="commit-meta">{c.ts} • parents: {c.parents.length ? c.parents.join(', ') : 'root'}</div>
+              {c.id === head && <div className="head-badge">HEAD</div>}
+            </div>
+          ))}
+          <button className="button button--primary" onClick={() => {
+            const newId = Math.random().toString(16).slice(2, 8);
+            const newC = { id: newId, msg: 'New commit from graph', parents: [head], ts: new Date().toISOString().split('T')[0] };
+            setCommits(prev => [...prev, newC]);
+            setHead(newId);
+            setBranches(prev => ({ ...prev, [currentBranch]: newId }));
+            setReflog(prev => [{ action: 'commit', id: newId, msg: newC.msg }, ...prev]);
+          }}>
+            <Plus size={16} /> New commit on current HEAD
+          </button>
+        </div>
+      </section>
+
+      {/* 2. Staging Area */}
+      <section className="section" id="staging">
+        <div className="section-header">
+          <Folder size={22} />
+          <h2>2. The Staging Area (Index)</h2>
+        </div>
+        <p>The index is the "proposed next commit". Working directory changes are not recorded until you `git add` them.</p>
+
+        <div className="staging-area">
+          <div className="pane">
+            <h4>Working Directory</h4>
+            {Object.keys(workingDir).map(f => (
+              <div key={f} className="file-row">
+                <span><FileText size={14} /> {f}</span>
+                <button onClick={() => editFile(f)} className="small-btn">Edit</button>
+                <button onClick={() => stageFile(f)} className="small-btn primary">Stage</button>
+              </div>
+            ))}
+          </div>
+          <div className="pane">
+            <h4>Staging Area (Index)</h4>
+            {Object.keys(staged).length === 0 && <div className="empty">Nothing staged yet</div>}
+            {Object.keys(staged).map(f => (
+              <div key={f} className="file-row staged">
+                <span>{f}</span>
+                <button onClick={() => unstageFile(f)} className="small-btn">Unstage</button>
+              </div>
+            ))}
+            <div className="commit-box">
+              <input value={commitMsg} onChange={e => setCommitMsg(e.target.value)} placeholder="Commit message" />
+              <button className="button button--primary" onClick={doCommit} disabled={Object.keys(staged).length === 0}>
+                <GitCommit size={16} /> Commit
+              </button>
+            </div>
+          </div>
+          <div className="pane">
+            <h4>History (current branch)</h4>
+            <div className="history-list">
+              {commits.slice().reverse().slice(0, 5).map(c => (
+                <div key={c.id} className="hist-item">{c.id.slice(0,6)} — {c.msg}</div>
+              ))}
+            </div>
           </div>
         </div>
       </section>
 
-      <section className="section" id="skills">
+      {/* 3. Branches & Merge */}
+      <section className="section">
         <div className="section-header">
-          <Settings size={22} />
-          <h2>2. Skills — The Self-Improving Layer</h2>
+          <GitBranch size={22} />
+          <h2>3. Branches &amp; Merge (with conflict)</h2>
         </div>
-        <p>When the agent (or you) solves a hard problem, it can save the procedure as a reusable skill. Skills are loaded automatically on future sessions. This is how Hermes gets better at *your* specific work over time.</p>
-        <div className="cards">
-          <div className="card">
-            <h3>Authoring</h3>
-            <p>After a successful complex task, the agent offers to save the steps as SKILL.md. You can edit and it becomes a first-class tool.</p>
+        <p>Branches are just movable pointers to commits. Merge creates a merge commit with two parents.</p>
+
+        <div className="branch-sim">
+          <div className="branch-list">
+            <strong>Branches:</strong>
+            {Object.keys(branches).map(b => (
+              <button key={b} className={`branch-btn ${b === currentBranch ? 'active' : ''}`} onClick={() => checkout(b)}>
+                {b} {b === currentBranch ? '(current)' : ''}
+              </button>
+            ))}
+            <button className="small-btn" onClick={() => createBranch('feature')}>+ Create "feature"</button>
           </div>
-          <div className="card">
-            <h3>Loading</h3>
-            <p>Skills are injected into the system prompt and tool selection. The agent "remembers" how to do things it has done before.</p>
+          <div className="merge-area">
+            <button className="button" onClick={simulateMerge}>
+              <GitMerge size={16} /> Simulate merge (will create conflict on src/app.js)
+            </button>
+            {showConflict && (
+              <div className="conflict-resolver">
+                <div className="conflict-header">Merge conflict in src/app.js</div>
+                <div className="conflict-actions">
+                  <button onClick={() => resolveConflict('ours')}>Accept "ours" (main)</button>
+                  <button onClick={() => resolveConflict('theirs')}>Accept "theirs" (feature)</button>
+                </div>
+              </div>
+            )}
+            {conflictResolution && <div className="resolved">Conflict resolved with {conflictResolution}. Merge commit created.</div>}
           </div>
-          <div className="card">
-            <h3>Curator</h3>
-            <p>Background process prunes stale skills, pins important ones, and keeps a backup tar.gz so nothing is lost.</p>
+        </div>
+      </section>
+
+      {/* 4. Reflog & Time Travel */}
+      <section className="section">
+        <div className="section-header">
+          <RotateCcw size={22} />
+          <h2>4. Reflog — Time Travel</h2>
+        </div>
+        <p>Git keeps a log of every movement of HEAD. Even "lost" commits can be recovered.</p>
+
+        <div className="reflog">
+          {reflog.map((entry, i) => (
+            <div key={i} className="reflog-entry">
+              <span>{entry.action} → {entry.id.slice(0,6)}</span>
+              <span className="msg">{entry.msg}</span>
+              <button className="small-btn" onClick={() => resetToReflog(entry.id)}>git reset --hard {entry.id.slice(0,6)}</button>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* 5. .git Internals */}
+      <section className="section">
+        <div className="section-header">
+          <Folder size={22} />
+          <h2>5. Inside .git (Content-Addressable Store)</h2>
+        </div>
+        <p>Objects are stored by SHA-1 hash. Blobs (file contents), Trees (directory listings), Commits. Nothing is named by filename — everything is content-addressed.</p>
+
+        <div className="internals">
+          <div className="object-list">
+            <h4>Recent objects</h4>
+            {commits.slice(-4).map(c => (
+              <div key={c.id} className="obj" onClick={() => alert(gitCatFile(c.id))}>
+                commit {c.id} — click to cat-file
+              </div>
+            ))}
           </div>
+          <div className="note">In real Git: <code>git cat-file -p &lt;hash&gt;</code> shows the object. Everything is immutable and deduplicated by hash.</div>
+
+          {/* NEW: Live hash-object demo — signature interactive that makes the "content-addressable" idea click */}
+          <div className="hash-demo">
+            <h4>Live hash-object (the real magic)</h4>
+            <p className="small">Edit the text below. The "address" (hash) is derived only from the bytes. Identical content always produces the identical hash — this is why Git can store any file once and never duplicate it again.</p>
+            <textarea 
+              value={blobContent} 
+              onChange={e => setBlobContent(e.target.value)} 
+              className="hash-input"
+              rows={3}
+              placeholder="Any file content..."
+            />
+            <div className="hash-row">
+              <button className="button button--primary" onClick={storeBlob}>
+                <Hash size={16} /> git hash-object -w
+              </button>
+              <div className="computed-hash">
+                computed address: <code>{computeGitHash(blobContent).slice(0, 12)}…</code>
+              </div>
+            </div>
+            <div className="stored-list">
+              <strong>Objects currently "in .git/objects" (blobs + commits):</strong>
+              {storedBlobs.map((o, i) => (
+                <div key={'b'+i} className="obj" onClick={() => inspectObject(o)}>
+                  {o.type} {o.hash.slice(0,12)} — click to cat-file
+                </div>
+              ))}
+              {commits.slice(-2).map(c => (
+                <div key={c.id} className="obj" onClick={() => alert(gitCatFile(c.id))}>
+                  commit {c.id} — click
+                </div>
+              ))}
+            </div>
+            <div className="note" style={{marginTop: 8, fontSize: '0.75rem'}}>Try typing the exact same content twice — the hash stays identical and it won't duplicate in the list. Change one character → brand new address.</div>
+          </div>
+        </div>
+      </section>
+
+      <div className="footer">
+        <div>Git turns your filesystem into an append-only, content-addressed, distributed database • React + Vite • GitHub Pages</div>
+        <div>leonlzd120000/explain</div>
+      </div>
+    </main>
+  );
+}
+
+function OpenAIPage() {
+  // 1. Pre-training scale simulator
+  const [pParams, setPParams] = useState(72);
+  const [pData, setPData] = useState(68);
+  const [pCompute, setPCompute] = useState(85);
+  const pretrainScore = Math.round((pParams * 0.32 + pData * 0.38 + pCompute * 0.3));
+  const unlockedSkills = [
+    { name: 'Language', thr: 45 },
+    { name: 'Facts', thr: 55 },
+    { name: 'Reasoning', thr: 68 },
+    { name: 'Code', thr: 72 },
+    { name: 'Multimodal', thr: 81 },
+  ];
+
+  // 2. RLHF / Preference Arena
+  const [rlhfVotes, setRlhfVotes] = useState({});
+  const rlhfExamples = [
+    {
+      id: 'p1',
+      prompt: 'Explain why the sky is blue in one sentence.',
+      a: 'Because molecules in the air scatter shorter blue wavelengths of sunlight more than longer ones.',
+      b: 'The sky is blue because of magic and also because the ocean reflects into it or something.',
+    },
+    {
+      id: 'p2',
+      prompt: 'Write a haiku about debugging.',
+      a: 'Bugs hide in the night / Stack traces whisper secrets / Fix, then sleep at last.',
+      b: 'Code is hard sometimes / I do not know the answer / Please ask someone else.',
+    },
+  ];
+  const rlhfReward = Object.keys(rlhfVotes).length > 0 
+    ? Math.round(50 + Object.values(rlhfVotes).filter(v => v === 'a').length * 18 - Object.values(rlhfVotes).filter(v => v === 'b').length * 9) 
+    : 52;
+
+  const castVote = (exId, choice) => {
+    setRlhfVotes(prev => ({ ...prev, [exId]: choice }));
+  };
+
+  // 3. Signature: Reasoning Budget Allocator (test-time compute)
+  const [budget, setBudget] = useState(12000);
+  const [selectedProblem, setSelectedProblem] = useState(0);
+  const [revealed, setRevealed] = useState(4);
+  const problems = [
+    { 
+      q: 'A farmer has 3 bags of apples. Bag A has 4 more than bag B. Bag C has twice as many as A. Total 48 apples. How many in bag B?', 
+      base: 'Let B = x. A = x+4. C = 2(x+4). x + (x+4) + 2(x+4) = 48 → 4x + 12 = 48 → x=9. Bag B has 9.',
+    },
+    { 
+      q: 'You have two ropes that each burn in 60 minutes. How do you measure exactly 45 minutes?',
+      base: 'Light both ends of rope 1 and one end of rope 2. When rope 1 finishes (30 min), light the other end of rope 2. It will finish in 15 more minutes (total 45).',
+    },
+  ];
+  const currentProblem = problems[selectedProblem];
+  const thinkingSteps = Math.max(2, Math.floor(budget / 1400));
+  const accuracy = Math.min(96, 42 + Math.floor(budget / 820));
+  const estCost = (budget * 0.000028).toFixed(3);
+
+  const thoughts = [
+    'Identify variables and equations...',
+    'Set up the system of relations from the problem statement.',
+    'Solve the linear equation step by step.',
+    'Verify by plugging the value back into all three bags.',
+    'Check edge cases: negative apples? total matches?',
+    'Consider if the problem implies discrete whole apples.',
+    'Double-check arithmetic on the coefficients.',
+    'Re-express the answer in the units requested.',
+  ];
+  const visibleThoughts = thoughts.slice(0, Math.min(revealed, thinkingSteps));
+
+  const allocateMore = () => {
+    const newBudget = Math.min(64000, budget + 6000);
+    setBudget(newBudget);
+    setRevealed(r => Math.min(12, r + 2));
+  };
+
+  const resetReasoning = () => {
+    setBudget(12000);
+    setRevealed(4);
+  };
+
+  // 4. Simple serving cost model
+  const [batchSize, setBatchSize] = useState(32);
+  const [modelSize, setModelSize] = useState(70); // B params
+  const tokensPerReq = 180;
+  const costPerMToken = (modelSize / 70) * 0.9 * (batchSize < 8 ? 1.6 : 1);
+  const effectiveCost = (tokensPerReq * costPerMToken / 1000 / batchSize).toFixed(4);
+
+  useEffect(() => {
+    document.title = 'How OpenAI Works • Explain to me';
+  }, []);
+
+  return (
+    <main className="shell openai-page">
+      <nav className="project-nav" aria-label="Project navigation">
+        <a href="#/" className="nav-link">All projects</a>
+        <a href="#/large-language-models" className="nav-link">LLM Basics</a>
+        <a href="#/llm-context" className="nav-link">Context</a>
+        <a href="#/agi" className="nav-link">AGI</a>
+        <a href="https://github.com/leonlzd120000/explain" className="nav-link">
+          Repository <ExternalLink size={14} />
+        </a>
+      </nav>
+
+      <section className="hero openai-hero">
+        <div>
+          <p className="eyebrow">The Intelligence Refinery</p>
+          <h1>How OpenAI<br />Works</h1>
+          <p className="lede">
+            Not just "a big model". A complete pipeline: pre-training on clusters the size of small cities, preference tuning, test-time reasoning engines, and a product flywheel that turns every user into more training signal.
+          </p>
+          <div className="actions">
+            <a href="#reasoning" className="button button--primary">
+              Try the reasoning budget <Timer size={18} />
+            </a>
+            <a href="#posttrain" className="button">
+              See the alignment loop
+            </a>
+          </div>
+        </div>
+        <div className="token-visual" style={{opacity: 0.7}}>
+          <div style={{fontSize: '0.8rem', color: '#8a877e', marginBottom: 8}}>Pretrain → Posttrain → Reason → Serve</div>
+          <div className="token-stream">
+            {['DATA', 'CLUSTER', 'PREFS', 'o1', 'API'].map((t, i) => (
+              <div key={i} className={`token ${i === 3 ? 'active' : ''}`}>{t}</div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="section" id="pretrain">
+        <div className="section-header">
+          <Factory size={22} />
+          <h2>1. Pre-training: The Furnace</h2>
+        </div>
+        <p>OpenAI (and others) first train a base model on internet-scale text + code + math. The only way to get emergent abilities is to throw truly enormous amounts of data and compute at a transformer.</p>
+
+        <div className="scale-sim">
+          <div className="sliders">
+            <div>
+              <label>Parameters (billions) <strong>{pParams * 7}</strong></label>
+              <input type="range" min="30" max="120" value={pParams} onChange={e => setPParams(parseInt(e.target.value))} />
+            </div>
+            <div>
+              <label>Training tokens (trillions) <strong>{(pData * 0.18).toFixed(1)}</strong></label>
+              <input type="range" min="30" max="110" value={pData} onChange={e => setPData(parseInt(e.target.value))} />
+            </div>
+            <div>
+              <label>Compute (relative) <strong>{pCompute}</strong></label>
+              <input type="range" min="40" max="110" value={pCompute} onChange={e => setPCompute(parseInt(e.target.value))} />
+            </div>
+          </div>
+
+          <div className="scale-result">
+            <div>
+              <div className="cap-score">{pretrainScore}</div>
+              <div className="cap-label">Relative capability</div>
+            </div>
+            <div className="skill-dots">
+              {unlockedSkills.map((s, i) => (
+                <div key={i} className={`skill-dot ${pretrainScore > s.thr ? 'unlocked' : ''}`}>{s.name}</div>
+              ))}
+            </div>
+          </div>
+          <div style={{fontSize:'0.75rem', color:'var(--muted)', marginTop:8}}>Real runs cost hundreds of millions in compute. Emergent skills appear suddenly once the combination crosses a threshold.</div>
+        </div>
+      </section>
+
+      <section className="section" id="posttrain">
+        <div className="section-header">
+          <Shield size={22} />
+          <h2>2. Post-training: The Alignment Refinery</h2>
+        </div>
+        <p>A raw base model is not useful or safe. OpenAI runs supervised fine-tuning then reinforcement learning from human (and AI) feedback — RLHF / RLAIF — to make it follow instructions and refuse harmful requests.</p>
+
+        <div className="rlhf-arena">
+          <div style={{marginBottom:12, fontSize:'0.875rem', color:'var(--muted)'}}>Click the response you prefer. Watch the simulated reward model shift (this is how the "helpful &amp; harmless" personality is installed at scale).</div>
+          {rlhfExamples.map((ex) => (
+            <div key={ex.id} style={{marginBottom: 18}}>
+              <div className="rlhf-prompt">{ex.prompt}</div>
+              <div className="response-pair">
+                <div 
+                  className={`response ${rlhfVotes[ex.id] === 'a' ? 'selected' : ''}`}
+                  onClick={() => castVote(ex.id, 'a')}
+                >
+                  <div className="which">Response A</div>
+                  <div className="text">{ex.a}</div>
+                </div>
+                <div 
+                  className={`response ${rlhfVotes[ex.id] === 'b' ? 'selected' : ''}`}
+                  onClick={() => castVote(ex.id, 'b')}
+                >
+                  <div className="which">Response B</div>
+                  <div className="text">{ex.b}</div>
+                </div>
+              </div>
+            </div>
+          ))}
+          <div className="reward-label">
+            <span>Simulated "helpfulness" reward model</span>
+            <span style={{color: 'var(--accent)'}}>{rlhfReward}%</span>
+          </div>
+          <div className="reward-bar">
+            <div className="fill" style={{width: `${rlhfReward}%`}} />
+          </div>
+        </div>
+      </section>
+
+      <section className="section" id="reasoning">
+        <div className="section-header">
+          <Timer size={22} />
+          <h2>3. Test-Time Reasoning — The o-Series Bet (Signature)</h2>
+        </div>
+        <p>Starting with o1, OpenAI made a major architectural and product bet: for hard problems, it is more effective to spend more compute <em>at inference time</em> on hidden chain-of-thought than to only scale pre-training. You literally pay for the model to "think longer".</p>
+
+        <div className="reasoning-alloc">
+          <div className="budget-controls">
+            <label>
+              Thinking budget (tokens) 
+              <input 
+                type="range" 
+                min="2000" 
+                max="64000" 
+                step="500" 
+                value={budget} 
+                onChange={e => { setBudget(parseInt(e.target.value)); setRevealed(Math.floor(parseInt(e.target.value)/1400)); }} 
+              />
+            </label>
+            <div style={{textAlign:'right'}}>
+              <div className="budget-value">{budget.toLocaleString()}</div>
+              <div style={{fontSize:'0.7rem', color:'var(--muted)'}}>internal tokens</div>
+            </div>
+          </div>
+
+          <div style={{margin: '10px 0'}}>
+            <strong>Problem:</strong> {currentProblem.q}
+            <button onClick={() => { setSelectedProblem((selectedProblem + 1) % problems.length); setRevealed(4); }} style={{marginLeft:12, fontSize:'0.75rem'}} className="small-btn">Next problem</button>
+          </div>
+
+          <div className="thought-trace">
+            {visibleThoughts.map((t, i) => (
+              <div key={i} className="thought">→ {t}</div>
+            ))}
+            {visibleThoughts.length < thinkingSteps && <div className="thought" style={{opacity:0.5}}>(more steps hidden — increase budget)</div>}
+          </div>
+
+          <div className="metrics">
+            <div className="metric">
+              <div className="val">{thinkingSteps}</div>
+              <div className="lbl">reasoning steps</div>
+            </div>
+            <div className="metric">
+              <div className="val">{accuracy}%</div>
+              <div className="lbl">est. accuracy</div>
+            </div>
+            <div className="metric">
+              <div className="val">${estCost}</div>
+              <div className="lbl">est. cost (this call)</div>
+            </div>
+          </div>
+
+          <div style={{marginTop: 14, display:'flex', gap:8, flexWrap:'wrap'}}>
+            <button className="button button--primary" onClick={allocateMore}>
+              Allocate +6k tokens (more thinking)
+            </button>
+            <button className="button" onClick={resetReasoning}>Reset demo</button>
+          </div>
+          <div style={{fontSize:'0.75rem', color:'var(--muted)', marginTop:8}}>This is the core idea behind o1/o3: the model uses extra compute to explore solution paths internally before answering. Quality scales with the budget you are willing to spend per query.</div>
         </div>
       </section>
 
       <section className="section">
         <div className="section-header">
-          <Users size={22} />
-          <h2>3. Delegation &amp; Sub-Agents</h2>
+          <Cpu size={22} />
+          <h2>4. Inference at Scale</h2>
         </div>
-        <p>Hermes can spawn fully independent child agents (leaf or orchestrator roles) for parallel work. The parent waits for summaries and merges results. This is how complex, long-running missions happen without blocking your chat.</p>
+        <p>Once the model exists, serving millions of users cheaply requires heavy optimization: continuous batching, paged attention, quantization, speculative decoding, and clever KV cache management (see the context explainer).</p>
+
+        <div className="scale-sim" style={{marginTop:16}}>
+          <div className="sliders">
+            <div>
+              <label>Batch size (parallel requests) <strong>{batchSize}</strong></label>
+              <input type="range" min="1" max="128" value={batchSize} onChange={e => setBatchSize(parseInt(e.target.value))} />
+            </div>
+            <div>
+              <label>Model size (B params) <strong>{modelSize}</strong></label>
+              <input type="range" min="7" max="405" step="7" value={modelSize} onChange={e => setModelSize(parseInt(e.target.value))} />
+            </div>
+          </div>
+          <div style={{marginTop:16, fontSize:'0.95rem'}}>
+            Effective marginal cost per request at this batch: <strong style={{color:'var(--accent)'}}>${effectiveCost}</strong>
+          </div>
+          <div style={{fontSize:'0.75rem', color:'var(--muted)'}}>Bigger batch = much lower cost per user. This is why OpenAI can offer GPT-4o cheap enough for consumer use.</div>
+        </div>
+      </section>
+
+      <section className="section">
+        <div className="section-header">
+          <TrendingUp size={22} />
+          <h2>5. The Flywheel + Safety Layer</h2>
+        </div>
+        <div className="openai-flywheel">
+          <div className="flywheel-card">
+            <h4>Product → Data</h4>
+            <p>ChatGPT is the largest preference data collector in history. Every thumbs up/down and edit becomes training signal for the next model.</p>
+          </div>
+          <div className="flywheel-card">
+            <h4>Data → Better Models</h4>
+            <p>More (and higher quality) human feedback → stronger post-training → more users trust the product → even more data.</p>
+          </div>
+          <div className="flywheel-card">
+            <h4>Revenue → Compute</h4>
+            <p>API + ChatGPT Plus revenue funds the next giant training run. The loop is the moat.</p>
+          </div>
+          <div className="flywheel-card">
+            <h4>Safety / Policy</h4>
+            <p>Red teaming, model spec, refusals, and usage policies are part of the "product" — they are how OpenAI tries to ship powerful systems responsibly at scale.</p>
+          </div>
+        </div>
+      </section>
+
+      <div className="footer">
+        <div>OpenAI turns research, compute, and user feedback into a continuously improving intelligence product • React + Vite • GitHub Pages</div>
+        <div>leonlzd120000/explain</div>
+      </div>
+    </main>
+  );
+}
+
+
+
+function HermesAgentPage() {
+  const [goal, setGoal] = useState("Install a persistent skill for git-aware commands");
+  const [skills, setSkills] = useState([{id:"core",name:"Core Loop",active:true},{id:"git",name:"Git Expert",active:true}]);
+  const [trace, setTrace] = useState([]);
+  const [memory, setMemory] = useState({profile:"fe", turns:0});
+  const [turn, setTurn] = useState(0);
+  const runTurn = () => {
+    const t = turn + 1;
+    const newTrace = [...trace, {type:"thought",content:"Planning..."}, {type:"tool",content:"git status"}, {type:"result",content:"clean"}, {type:"output",content:"Ready"}];
+    setTrace(newTrace); setTurn(t); setMemory(m => ({...m, turns:t}));
+  };
+  const installSkill = () => setSkills(p => [...p, {id:"delegation",name:"Delegation",active:true}]);
+  useEffect(() => { document.title = "How Hermes Agent Works • Explain to me"; }, []);
+  return (
+    <main className="shell hermes-page">
+      <nav className="project-nav"><a href="#/" className="nav-link">All projects</a></nav>
+      <section className="hero"><h1>How Hermes Agent Works</h1><p>The autonomous loop with skills, delegation, memory and gateway.</p></section>
+      <section className="section" id="loop">
+        <h2>Live Simulator</h2>
+        <input value={goal} onChange={e=>setGoal(e.target.value)} />
+        <button onClick={runTurn}>Run Turn</button>
+        <button onClick={installSkill}>Install Skill</button>
+        <div className="trace">{trace.map((s,i)=><div key={i}>{s.type}: {s.content}</div>)}</div>
+        <pre>{JSON.stringify(memory)}</pre>
+      </section>
+      <div className="footer">Hermes • React + Vite</div>
+    </main>
+  );
+}
+
+
+function OpenClawPage() {
+  const [angle, setAngle] = useState(45);
+  const [force, setForce] = useState(60);
+  const [sensitivity, setSensitivity] = useState(70);
+  const [graspResult, setGraspResult] = useState(null);
+  const [plannerTrace, setPlannerTrace] = useState([]);
+
+  const executeGrasp = () => {
+    const success = Math.min(95, Math.max(25, Math.round(force * 0.55 + sensitivity * 0.35 - Math.abs(angle - 55) * 0.6)));
+    const trace = [
+      "1. Vision: Object centroid detected, size estimated",
+      "2. Approach: Kinematic plan for " + angle + "° entry angle",
+      "3. Contact: Force sensors read " + force + "% of max",
+      "4. Feedback: PID loop at " + sensitivity + "% gain",
+      "5. Verify: Grasp quality " + success + "% — " + (success > 75 ? "STABLE HOLD" : "RISK OF SLIP")
+    ];
+    setGraspResult({ success, stable: success > 75 });
+    setPlannerTrace(trace);
+  };
+
+  const resetSim = () => {
+    setGraspResult(null);
+    setPlannerTrace([]);
+  };
+
+  useEffect(() => {
+    document.title = 'How OpenClaw Works • Explain to me';
+  }, []);
+
+  return (
+    <main className="shell openclaw-page">
+      <nav className="project-nav" aria-label="Project navigation">
+        <a href="#/" className="nav-link">All projects</a>
+        <a href="#/git" className="nav-link">Git</a>
+        <a href="#/hermes-agent" className="nav-link">Hermes</a>
+        <a href="https://github.com/leonlzd120000/explain" className="nav-link">
+          Repository <ExternalLink size={14} />
+        </a>
+      </nav>
+
+      <section className="hero openclaw-hero">
+        <div>
+          <p className="eyebrow">Open Hardware + AI Control</p>
+          <h1>How OpenClaw<br />Works</h1>
+          <p className="lede">
+            An open-source precision claw for robotics and manipulation. Mechanical design, real-time sensor fusion, closed-loop control, and AI grasp planning that turns raw force and vision into reliable picks.
+          </p>
+          <div className="actions">
+            <a href="#sim" className="button button--primary">
+              Try the live simulator <Target size={18} />
+            </a>
+            <a href="#ai" className="button">
+              See the AI planner
+            </a>
+          </div>
+        </div>
+        <div className="claw-visual">
+          <div className="claw-diagram">
+            <div className="jaw" style={{transform: `rotate(${angle - 45}deg)`}}>Left</div>
+            <div className="jaw right" style={{transform: `rotate(${-(angle - 45)}deg)`}}>Right</div>
+            <div className="object">Object</div>
+          </div>
+          <div style={{fontSize:'0.75rem', color:'var(--muted)'}}>Real-time kinematics + force feedback</div>
+        </div>
+      </section>
+
+      <section className="section" id="sim">
+        <div className="section-header">
+          <Target size={22} />
+          <h2>1. Live Claw Simulator (Signature)</h2>
+        </div>
+        <p>Adjust the mechanical and control parameters. The AI planner reacts in real time and reports grasp success probability based on physics and sensor data.</p>
+
+        <div className="claw-sim">
+          <div className="controls">
+            <div>
+              <label>Jaw Angle <strong>{angle}°</strong></label>
+              <input type="range" min="20" max="80" value={angle} onChange={e => setAngle(parseInt(e.target.value))} />
+            </div>
+            <div>
+              <label>Grip Force <strong>{force}%</strong></label>
+              <input type="range" min="20" max="100" value={force} onChange={e => setForce(parseInt(e.target.value))} />
+            </div>
+            <div>
+              <label>Sensor Sensitivity <strong>{sensitivity}%</strong></label>
+              <input type="range" min="30" max="100" value={sensitivity} onChange={e => setSensitivity(parseInt(e.target.value))} />
+            </div>
+          </div>
+
+          <div className="sim-actions">
+            <button className="button button--primary" onClick={executeGrasp}>
+              Execute Grasp
+            </button>
+            <button className="button" onClick={resetSim}>Reset</button>
+          </div>
+
+          {graspResult && (
+            <div className="result">
+              <div className="success">Grasp Quality: <strong>{graspResult.success}%</strong> {graspResult.stable ? "— STABLE" : "— UNSTABLE"}</div>
+              <div className="trace">
+                {plannerTrace.map((line, i) => <div key={i}>{line}</div>)}
+              </div>
+            </div>
+          )}
+        </div>
+      </section>
+
+      <section className="section">
+        <div className="section-header">
+          <SlidersHorizontal size={22} />
+          <h2>2. Mechanical Design</h2>
+        </div>
+        <p>The claw uses a parallel jaw mechanism with servo or linear actuators. Kinematics are modeled so small changes in motor angle translate predictably to grip width and force.</p>
         <div className="cards">
           <div className="card">
-            <h3>Leaf Agents</h3>
-            <p>Do one focused job and return a summary. Cannot spawn further.</p>
+            <h3>Kinematics</h3>
+            <p>Link lengths and joint angles determine the workspace. The simulator shows how angle directly affects contact geometry.</p>
           </div>
           <div className="card">
-            <h3>Orchestrator</h3>
-            <p>Can spawn its own workers. Bounded depth to prevent runaway.</p>
-          </div>
-          <div className="card">
-            <h3>Worktree Mode</h3>
-            <p>Each sub-agent can run in an isolated git worktree so parallel edits do not conflict.</p>
+            <h3>Force Transmission</h3>
+            <p>Gear ratios and linkage geometry multiply motor torque into fingertip force. Higher force = better friction but risk of crushing delicate objects.</p>
           </div>
         </div>
       </section>
@@ -268,86 +1738,118 @@ function HermesAgentPage() {
       <section className="section">
         <div className="section-header">
           <Database size={22} />
-          <h2>4. Memory &amp; Profiles</h2>
+          <h2>3. Sensor Suite</h2>
         </div>
-        <p>Memory is pluggable (built-in SQLite FTS, Honcho, Mem0...). Profiles give you completely isolated configs, skills, and memory for different projects or "personas".</p>
+        <p>Multiple modalities are fused: vision for pose, force/torque for contact, tactile arrays for slip detection, and sometimes audio for texture.</p>
         <div className="stats">
           <div className="stat">
-            <div className="stat-value">Cross-session</div>
-            <div className="stat-label">User preferences, environment facts, learned workflows</div>
+            <div className="stat-value">Vision</div>
+            <div className="stat-label">Object detection + 6D pose</div>
           </div>
           <div className="stat">
-            <div className="stat-value">Profiles</div>
-            <div className="stat-label">~/.hermes/profiles/&lt;name&gt;/ for full isolation</div>
+            <div className="stat-value">Force</div>
+            <div className="stat-label">0-100% continuous reading</div>
+          </div>
+          <div className="stat">
+            <div className="stat-value">Tactile</div>
+            <div className="stat-label">Slip &amp; texture at 1kHz</div>
           </div>
         </div>
+      </section>
+
+      <section className="section" id="ai">
+        <div className="section-header">
+          <Brain size={22} />
+          <h2>4. AI Grasp Planner</h2>
+        </div>
+        <p>The planner is a small policy that takes sensor readings and outputs motor commands and confidence. In the simulator it is a transparent heuristic so you can see exactly why a grasp succeeds or fails.</p>
+        <p>In real OpenClaw deployments this can be replaced with learned models (imitation or reinforcement) while keeping the same sensor and actuator interface.</p>
       </section>
 
       <section className="section">
         <div className="section-header">
           <Link size={22} />
-          <h2>5. The Gateway — One Agent, Everywhere</h2>
+          <h2>5. Open Ecosystem</h2>
         </div>
-        <p>The same core agent runs on Telegram, Discord, Slack, email, SMS, and as a local CLI. The gateway translates platform messages into the same tool-using loop.</p>
+        <p>Everything is open: CAD files, BOM, firmware, control libraries, and training datasets. The community maintains multiple end-effector variants (soft fingers, suction, specialized jaws) that share the same control API.</p>
         <div className="cards">
           <div className="card">
-            <h3>Platforms</h3>
-            <p>Telegram DMs &amp; topics, Discord, Slack, WhatsApp, iMessage, email, webhooks, and more.</p>
+            <h3>Hardware</h3>
+            <p>3D printable + off-the-shelf parts. Multiple universities and makers have built and improved the design.</p>
           </div>
           <div className="card">
-            <h3>Tools stay the same</h3>
-            <p>Whether the message came from Telegram or your terminal, the agent has the same file, terminal, web, and skill tools.</p>
+            <h3>Software</h3>
+            <p>ROS 2 nodes, Python/C++ SDK, Gazebo and MuJoCo simulation models.</p>
           </div>
           <div className="card">
-            <h3>Cron &amp; Webhooks</h3>
-            <p>Scheduled jobs and incoming HTTP events drive the same agent loop in the background.</p>
+            <h3>Community</h3>
+            <p>Active Discord, weekly calls, shared grasp datasets for training better policies.</p>
           </div>
         </div>
       </section>
 
       <div className="footer">
-        <div>Hermes turns chat into a persistent, skill-learning, multi-platform autonomous teammate • React + Vite • GitHub Pages</div>
+        <div>OpenClaw turns mechanical precision + sensor fusion + transparent planning into reliable, reproducible grasping • React + Vite • GitHub Pages</div>
         <div>leonlzd120000/explain</div>
       </div>
     </main>
   );
 }
 
+
 function App() {
-  // Robust hash routing (handles GitHub Pages subpath, query strings, and direct #/git loads)
-  const getCurrentHash = () => (window.location.hash || '#/').split('?')[0] || '#/';
+  const getCurrentHash = () => (window.location.hash || "#/").split("?")[0] || "#/";
   const [route, setRoute] = useState(getCurrentHash());
 
   useEffect(() => {
     const handleHashChange = () => setRoute(getCurrentHash());
-    window.addEventListener('hashchange', handleHashChange);
-    return () => window.removeEventListener('hashchange', handleHashChange);
+    window.addEventListener("hashchange", handleHashChange);
+    return () => window.removeEventListener("hashchange", handleHashChange);
   }, []);
 
-  // Update title for hub
   useEffect(() => {
-    if (route === '#/') {
-      document.title = 'Explain to me | Generated Explainers';
-    } else if (route === '#/large-language-models') {
-      document.title = 'How Large Language Models Work • Explain to me';
-    } else if (route === '#/llm-context') {
-      document.title = 'How Context Works in LLMs • Explain to me';
-    } else if (route === '#/agi') {
-      document.title = 'The Road to AGI • Explain to me';
-    } else if (route === '#/git') {
-      document.title = 'How Git Works • Explain to me';
-    } else if (route === '#/openai') {
-      document.title = 'How OpenAI Works • Explain to me';
-    } else if (route === '#/hermes-agent') {
-      document.title = 'How Hermes Agent Works • Explain to me';
+    if (route === "#/") {
+      document.title = "Explain to me | Generated Explainers";
+    } else if (route === "#/large-language-models") {
+      document.title = "How Large Language Models Work • Explain to me";
+    } else if (route === "#/llm-context") {
+      document.title = "How Context Works in LLMs • Explain to me";
+    } else if (route === "#/agi") {
+      document.title = "The Road to AGI • Explain to me";
+    } else if (route === "#/git") {
+      document.title = "How Git Works • Explain to me";
+    } else if (route === "#/openai") {
+      document.title = "How OpenAI Works • Explain to me";
+    } else if (route === "#/hermes-agent") {
+      document.title = "How Hermes Agent Works • Explain to me";
+    } else if (route === "#/openclaw") {
+      document.title = "How OpenClaw Works • Explain to me";
     }
   }, [route]);
 
-  if (route === '#/hermes-agent') {
+  if (route === "#/large-language-models") {
+    return <LlmPage />;
+  }
+  if (route === "#/llm-context") {
+    return <ContextPage />;
+  }
+  if (route === "#/agi") {
+    return <AgiPage />;
+  }
+  if (route === "#/git") {
+    return <GitPage />;
+  }
+  if (route === "#/openai") {
+    return <OpenAIPage />;
+  }
+  if (route === "#/hermes-agent") {
     return <HermesAgentPage />;
+  }
+  if (route === "#/openclaw") {
+    return <OpenClawPage />;
   }
 
   return <ProjectHub />;
 }
 
-createRoot(document.getElementById('root')).render(<App />);
+createRoot(document.getElementById("root")).render(<App />);
