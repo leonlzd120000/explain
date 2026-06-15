@@ -2201,3 +2201,145 @@ h1 {
     min-height: 160px;
   }
 }
+
+/* === LLM Memory Explainer styles === */
+.memory-page .hero {
+  grid-template-columns: 1.15fr 0.85fr;
+}
+
+.memory-visual {
+  background: #111317;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 20px;
+}
+
+.memory-split {
+  display: grid;
+  gap: 16px;
+}
+
+.memory-side {
+  background: #0a0b0f;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px;
+}
+
+.memory-side .label {
+  font-size: 0.75rem;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+
+.memory-side .bar {
+  height: 10px;
+  background: var(--accent);
+  border-radius: 999px;
+}
+
+.memory-side .bar.external {
+  background: var(--accent-2);
+}
+
+.kv-sim {
+  background: #111317;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 20px;
+}
+
+.kv-sim .cache-bar {
+  height: 14px;
+  background: #22252b;
+  border-radius: 999px;
+  position: relative;
+  margin: 12px 0;
+  overflow: hidden;
+}
+
+.kv-sim .cache-bar .fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), #ff9d2e);
+  transition: width 0.2s ease;
+}
+
+.kv-sim .eviction {
+  position: absolute;
+  right: 8px;
+  top: -22px;
+  font-size: 0.7rem;
+  color: #ff6b6b;
+}
+
+.cache-visual .history {
+  display: flex;
+  gap: 3px;
+  align-items: flex-end;
+  height: 60px;
+  margin: 8px 0 4px;
+}
+
+.cache-visual .tick {
+  flex: 1;
+  background: var(--accent);
+  border-radius: 2px;
+  min-height: 4px;
+  transition: height 0.15s ease;
+}
+
+.memory-bank {
+  background: #111317;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 20px;
+}
+
+.memory-bank .store {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.memory-bank input {
+  flex: 1;
+  background: #0a0b0f;
+  border: 1px solid var(--border);
+  color: white;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 0.95rem;
+}
+
+.memory-item {
+  background: #0a0b0f;
+  border: 1px solid var(--border);
+  padding: 10px 12px;
+  border-radius: 8px;
+  margin-bottom: 6px;
+  font-size: 0.9rem;
+}
+
+.memory-item .meta {
+  font-size: 0.7rem;
+  color: var(--muted);
+  margin-left: 8px;
+}
+
+.memory-item .score {
+  float: right;
+  color: var(--accent);
+  font-size: 0.8rem;
+}
+
+.retrieved {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px dashed var(--border);
+}
+
+@media (max-width: 820px) {
+  .memory-page .hero {
+    grid-template-columns: 1fr;
+  }
+}

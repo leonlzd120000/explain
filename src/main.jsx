@@ -53,6 +53,14 @@ const generatedProjects = [
     href: '#/openclaw',
     tag: 'Robotics',
   },
+,
+  {
+    id: "llm-memory",
+    title: "How Memory Works in LLMs",
+    summary: "Short-term KV cache vs persistent external memory banks, RAG, agent memory, and the techniques that let models remember across sessions and beyond the context window.",
+    href: "#/llm-memory",
+    tag: "LLM internals",
+  }
 ];
 
 function ProjectHub() {
@@ -1797,6 +1805,276 @@ function OpenClawPage() {
 }
 
 
+function LlmMemoryPage() {
+  // === Short-term Memory (KV Cache) Simulator ===
+  const [contextTokens, setContextTokens] = useState(128);
+  const [kvSize, setKvSize] = useState(128);
+  const [maxContext, setMaxContext] = useState(2048);
+  const [cacheHistory, setCacheHistory] = useState([128]);
+
+  const addToken = () => {
+    const newTokens = Math.min(contextTokens + 32, maxContext);
+    const newKv = Math.min(kvSize + 32, maxContext);
+    setContextTokens(newTokens);
+    setKvSize(newKv);
+    setCacheHistory(prev => [...prev.slice(-8), newKv]);
+  };
+
+  const resetKV = () => {
+    setContextTokens(128);
+    setKvSize(128);
+    setCacheHistory([128]);
+  };
+
+  const evictionRisk = Math.max(0, ((kvSize / maxContext) * 100) - 70);
+
+  // === Long-term / Persistent Memory Bank ===
+  const [memories, setMemories] = useState([
+    { id: 1, fact: "User prefers dark theme in all UIs", score: 0.92, timestamp: "2h ago" },
+    { id: 2, fact: "Project is a Vite + React explainer site on GitHub Pages", score: 0.88, timestamp: "yesterday" },
+    { id: 3, fact: "Previous topics: Git, Hermes Agent, OpenClaw, OpenAI", score: 0.71, timestamp: "3d ago" },
+  ]);
+  const [newFact, setNewFact] = useState("");
+  const [query, setQuery] = useState("");
+  const [retrieved, setRetrieved] = useState([]);
+
+  const storeFact = () => {
+    if (!newFact.trim()) return;
+    const fact = {
+      id: Date.now(),
+      fact: newFact.trim(),
+      score: 0.95,
+      timestamp: "just now"
+    };
+    setMemories(prev => [fact, ...prev].slice(0, 8));
+    setNewFact("");
+  };
+
+  const retrieve = () => {
+    if (!query.trim()) {
+      setRetrieved([]);
+      return;
+    }
+    // Simulated semantic similarity (toy model)
+    const q = query.toLowerCase();
+    const results = memories
+      .map(m => {
+        const text = m.fact.toLowerCase();
+        let sim = 0.3;
+        if (text.includes(q)) sim = 0.95;
+        else if (q.includes("theme") && text.includes("dark")) sim = 0.85;
+        else if (q.includes("git") && text.includes("git")) sim = 0.8;
+        else if (q.includes("memory") && text.includes("memory")) sim = 0.75;
+        return { ...m, sim: Math.round(sim * 100) / 100 };
+      })
+      .sort((a, b) => b.sim - a.sim)
+      .slice(0, 3);
+    setRetrieved(results);
+  };
+
+  const clearMemoryBank = () => {
+    setMemories([]);
+    setRetrieved([]);
+    setQuery("");
+  };
+
+  useEffect(() => {
+    document.title = 'How Memory Works in LLMs • Explain to me';
+  }, []);
+
+  return (
+    <main className="shell memory-page">
+      <nav className="project-nav" aria-label="Project navigation">
+        <a href="#/" className="nav-link">All projects</a>
+        <a href="#/llm-context" className="nav-link">Context</a>
+        <a href="#/large-language-models" className="nav-link">LLMs</a>
+        <a href="https://github.com/leonlzd120000/explain" className="nav-link">
+          Repository <ExternalLink size={14} />
+        </a>
+      </nav>
+
+      <section className="hero memory-hero">
+        <div>
+          <p className="eyebrow">The Two Memories of an LLM</p>
+          <h1>How Memory Works<br />in LLMs</h1>
+          <p className="lede">
+            LLMs have a fast but bounded "working memory" (KV cache) and can be given persistent external memory. 
+            The difference between the two is one of the most important ideas in modern LLM engineering.
+          </p>
+          <div className="actions">
+            <a href="#kv" className="button button--primary">
+              Play with KV Cache <Clock size={18} />
+            </a>
+            <a href="#bank" className="button">
+              Try the Memory Bank
+            </a>
+          </div>
+        </div>
+        <div className="memory-visual">
+          <div className="memory-split">
+            <div className="memory-side">
+              <div className="label">Short-term (KV Cache)</div>
+              <div className="bar" style={{width: `${Math.min(100, (kvSize / maxContext) * 100)}%`}}></div>
+              <div className="small">{kvSize} / {maxContext} tokens</div>
+            </div>
+            <div className="memory-side">
+              <div className="label">Long-term (External)</div>
+              <div className="bar external" style={{width: '100%'}}></div>
+              <div className="small">Unlimited • Approximate</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="section" id="kv">
+        <div className="section-header">
+          <Clock size={22} />
+          <h2>1. Short-term Memory: The KV Cache (Signature Simulator)</h2>
+        </div>
+        <p>
+          During generation the model caches key/value vectors for every previous token. This is the model's "working memory". 
+          It is extremely fast but has a hard limit (context window). When it fills up, older information is lost or compressed.
+        </p>
+
+        <div className="kv-sim">
+          <div className="controls">
+            <div>
+              <label>Current context length: <strong>{contextTokens}</strong> tokens</label>
+              <input type="range" min="64" max={maxContext} step="32" value={contextTokens} onChange={e => {
+                const v = parseInt(e.target.value);
+                setContextTokens(v);
+                setKvSize(Math.min(v, kvSize));
+              }} />
+            </div>
+            <div>
+              <label>KV cache size: <strong>{kvSize}</strong> (grows with context)</label>
+            </div>
+            <div className="actions">
+              <button className="button button--primary" onClick={addToken}>Add 32 tokens (next turn)</button>
+              <button className="button" onClick={resetKV}>Reset</button>
+            </div>
+          </div>
+
+          <div className="cache-visual">
+            <div className="cache-bar">
+              <div className="fill" style={{width: `${(kvSize / maxContext) * 100}%`}}></div>
+              {evictionRisk > 0 && <div className="eviction">Eviction risk: {evictionRisk.toFixed(0)}%</div>}
+            </div>
+            <div className="history">
+              {cacheHistory.map((size, i) => (
+                <div key={i} className="tick" style={{height: `${(size / maxContext) * 100}%`}}></div>
+              ))}
+            </div>
+            <div className="note">Each step the cache grows linearly. At the limit the model must drop or compress old keys.</div>
+          </div>
+        </div>
+      </section>
+
+      <section className="section" id="bank">
+        <div className="section-header">
+          <Database size={22} />
+          <h2>2. Long-term Memory: The External Memory Bank</h2>
+        </div>
+        <p>
+          To overcome the context limit we give the model an external memory. Facts are stored in a vector database. 
+          At inference time we retrieve the most relevant memories and inject them into the prompt. This is how agents and RAG systems remember across sessions.
+        </p>
+
+        <div className="memory-bank">
+          <div className="store">
+            <input 
+              value={newFact} 
+              onChange={e => setNewFact(e.target.value)} 
+              placeholder="Type a fact to store in long-term memory..." 
+              onKeyDown={e => e.key === 'Enter' && storeFact()}
+            />
+            <button className="button" onClick={storeFact}>Store Fact</button>
+            <button className="button" onClick={clearMemoryBank}>Clear Bank</button>
+          </div>
+
+          <div className="bank-list">
+            <div className="label">Stored memories ({memories.length})</div>
+            {memories.map(m => (
+              <div key={m.id} className="memory-item">
+                {m.fact} <span className="meta">{m.timestamp}</span>
+              </div>
+            ))}
+          </div>
+
+          <div className="retrieve">
+            <input 
+              value={query} 
+              onChange={e => setQuery(e.target.value)} 
+              placeholder="Query: what does the user like?" 
+              onKeyDown={e => e.key === 'Enter' && retrieve()}
+            />
+            <button className="button button--primary" onClick={retrieve}>Retrieve Top Matches</button>
+          </div>
+
+          {retrieved.length > 0 && (
+            <div className="retrieved">
+              <div className="label">Retrieved (simulated cosine similarity)</div>
+              {retrieved.map(r => (
+                <div key={r.id} className="memory-item retrieved">
+                  {r.fact} <span className="score">{(r.sim * 100).toFixed(0)}% match</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
+
+      <section className="section">
+        <div className="section-header">
+          <Brain size={22} />
+          <h2>3. Why the Distinction Matters</h2>
+        </div>
+        <div className="cards">
+          <div className="card">
+            <h3>KV Cache (Fast but Fragile)</h3>
+            <p>Perfect for the current conversation. Linear cost. Loses everything beyond the window. No persistence across sessions.</p>
+          </div>
+          <div className="card">
+            <h3>External Memory (Persistent but Noisy)</h3>
+            <p>Unlimited capacity. Retrieval is approximate (you get the top-k most similar). Requires good embedding model and chunking strategy.</p>
+          </div>
+          <div className="card">
+            <h3>Hybrid Systems (Modern Agents)</h3>
+            <p>Most powerful agents use both: KV cache for the current turn + a memory bank / vector store for long-term recall + summarization layers that compress old turns back into the cache.</p>
+          </div>
+        </div>
+      </section>
+
+      <section className="section">
+        <div className="section-header">
+          <Target size={22} />
+          <h2>4. Practical Techniques</h2>
+        </div>
+        <div className="cards">
+          <div className="card">
+            <h3>Sliding Window + Summarization</h3>
+            <p>Keep the last N turns in full + a running summary of everything before.</p>
+          </div>
+          <div className="card">
+            <h3>RAG (Retrieval-Augmented Generation)</h3>
+            <p>Chunk documents → embed → retrieve relevant chunks at query time.</p>
+          </div>
+          <div className="card">
+            <h3>Agent Memory</h3>
+            <p>Structured memory (facts, preferences, tasks) + episodic memory (what happened in past runs) + procedural memory (skills).</p>
+          </div>
+        </div>
+      </section>
+
+      <div className="footer">
+        <div>LLM memory is the difference between a model that forgets everything after 128k tokens and one that can remember your preferences for months • React + Vite • GitHub Pages</div>
+        <div>leonlzd120000/explain</div>
+      </div>
+    </main>
+  );
+}
+
+
 function App() {
   const getCurrentHash = () => (window.location.hash || "#/").split("?")[0] || "#/";
   const [route, setRoute] = useState(getCurrentHash());
@@ -1824,6 +2102,8 @@ function App() {
       document.title = "How Hermes Agent Works • Explain to me";
     } else if (route === "#/openclaw") {
       document.title = "How OpenClaw Works • Explain to me";
+    } else if (route === "#/llm-memory") {
+      document.title = "How Memory Works in LLMs • Explain to me";
     }
   }, [route]);
 
@@ -1847,6 +2127,10 @@ function App() {
   }
   if (route === "#/openclaw") {
     return <OpenClawPage />;
+  }
+
+  if (route === "#/llm-memory") {
+    return <LlmMemoryPage />;
   }
 
   return <ProjectHub />;
