@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
-import { ArrowRight, Zap, Brain, Layers, Target, Sparkles, ExternalLink, ScrollText, Database, Clock, AlertTriangle, SlidersHorizontal, RefreshCw, Mountain, Cpu, TrendingUp, Users, Lightbulb, GitBranch, GitCommit, GitMerge, GitPullRequest, Folder, FileText, RotateCcw, Plus, Minus, Hash, Factory, Shield, Timer } from 'lucide-react';
+import { ArrowRight, Zap, Brain, Layers, Target, Sparkles, ExternalLink, ScrollText, Database, Clock, AlertTriangle, SlidersHorizontal, RefreshCw, Mountain, Cpu, TrendingUp, Users, Lightbulb, GitBranch, GitCommit, GitMerge, GitPullRequest, Folder, FileText, RotateCcw, Plus, Minus, Hash, Factory, Shield, Timer, Archive, History } from 'lucide-react';
 import './styles.css';
 
 const generatedProjects = [
@@ -53,11 +53,10 @@ const generatedProjects = [
     href: '#/openclaw',
     tag: 'Robotics',
   },
-,
   {
     id: "llm-memory",
     title: "How Memory Works in LLMs",
-    summary: "Short-term KV cache vs persistent external memory banks, RAG, agent memory, and the techniques that let models remember across sessions and beyond the context window.",
+    summary: "Short-term KV cache vs persistent external memory banks, RAG, agent memory, and the techniques that let models remember across sessions and beyond the context window. + cross-session consolidation & forgetting timeline simulator.",
     href: "#/llm-memory",
     tag: "LLM internals",
   }
@@ -134,7 +133,6 @@ function LlmPage() {
           Repository <ExternalLink size={14} />
         </a>
       </nav>
-
       {/* Hero */}
       <section className="hero">
         <div>
@@ -1302,11 +1300,11 @@ function OpenAIPage() {
   const problems = [
     { 
       q: 'A farmer has 3 bags of apples. Bag A has 4 more than bag B. Bag C has twice as many as A. Total 48 apples. How many in bag B?', 
-      base: 'Let B = x. A = x+4. C = 2(x+4). x + (x+4) + 2(x+4) = 48 → 4x + 12 = 48 → x=9. Bag B has 9.',
+      base: 'Let B = x. A = x+4. C = 2(x+4). x + (x+4) + 2(x+4) = 48 → 4x + 12 = 48 → x=9. Bag B has 9.', 
     },
     { 
-      q: 'You have two ropes that each burn in 60 minutes. How do you measure exactly 45 minutes?',
-      base: 'Light both ends of rope 1 and one end of rope 2. When rope 1 finishes (30 min), light the other end of rope 2. It will finish in 15 more minutes (total 45).',
+      q: 'You have two ropes that each burn in 60 minutes. How do you measure exactly 45 minutes?', 
+      base: 'Light both ends of rope 1 and one end of rope 2. When rope 1 finishes (30 min), light the other end of rope 2. It will finish in 15 more minutes (total 45).', 
     },
   ];
   const currentProblem = problems[selectedProblem];
@@ -1585,8 +1583,6 @@ function OpenAIPage() {
   );
 }
 
-
-
 function HermesAgentPage() {
   const [goal, setGoal] = useState("Install a persistent skill for git-aware commands");
   const [skills, setSkills] = useState([{id:"core",name:"Core Loop",active:true},{id:"git",name:"Git Expert",active:true}]);
@@ -1616,7 +1612,6 @@ function HermesAgentPage() {
     </main>
   );
 }
-
 
 function OpenClawPage() {
   const [angle, setAngle] = useState(45);
@@ -1804,7 +1799,6 @@ function OpenClawPage() {
   );
 }
 
-
 function LlmMemoryPage() {
   // === Short-term Memory (KV Cache) Simulator ===
   const [contextTokens, setContextTokens] = useState(128);
@@ -1865,6 +1859,10 @@ function LlmMemoryPage() {
         else if (q.includes("theme") && text.includes("dark")) sim = 0.85;
         else if (q.includes("git") && text.includes("git")) sim = 0.8;
         else if (q.includes("memory") && text.includes("memory")) sim = 0.75;
+        // NEW: apply decay from cross-session time simulation
+        const age = (m.age || 0) + (typeof decayDays !== 'undefined' ? decayDays : 0);
+        const agePenalty = Math.max(0.15, 1 - age / 160);
+        sim = sim * agePenalty;
         return { ...m, sim: Math.round(sim * 100) / 100 };
       })
       .sort((a, b) => b.sim - a.sim)
@@ -1877,6 +1875,46 @@ function LlmMemoryPage() {
     setRetrieved([]);
     setQuery("");
   };
+
+  // === NEW: Cross-Session Consolidation & Forgetting (Signature Interactive) ===
+  const [newExp, setNewExp] = useState("");
+  const [sessions, setSessions] = useState([
+    {id: 1, label: 'Session 1 (now)', facts: ['User is exploring LLM memory concepts', 'Prefers interactive demos over static text']}
+  ]);
+  const [activeSessionId, setActiveSessionId] = useState(1);
+  const [decayDays, setDecayDays] = useState(0);
+
+  const activeSession = sessions.find(s => s.id === activeSessionId) || sessions[0];
+
+  const addExperience = () => {
+    if (!newExp.trim()) return;
+    setSessions(prev => prev.map(s => 
+      s.id === activeSessionId 
+        ? { ...s, facts: [...s.facts, newExp.trim()].slice(0, 6) } 
+        : s
+    ));
+    setNewExp("");
+  };
+
+  const consolidateSession = () => {
+    if (!activeSession.facts.length) return;
+    const toBank = activeSession.facts.slice(0, 3).map((fact, idx) => ({
+      id: Date.now() + idx,
+      fact,
+      score: 0.88 - idx * 0.04,
+      timestamp: `consolidated from ${activeSession.label}`,
+      age: 0
+    }));
+    setMemories(prev => [...toBank, ...prev].slice(0, 10));
+    const newId = Math.max(0, ...sessions.map(s => s.id)) + 1;
+    const newS = { id: newId, label: `Session ${newId}`, facts: [] };
+    setSessions(prev => [...prev, newS]);
+    setActiveSessionId(newId);
+    setDecayDays(0);
+  };
+
+  const switchToSession = (id) => setActiveSessionId(id);
+  const advanceTime = () => setDecayDays(d => Math.min(120, d + 14));
 
   useEffect(() => {
     document.title = 'How Memory Works in LLMs • Explain to me';
@@ -2066,6 +2104,66 @@ function LlmMemoryPage() {
         </div>
       </section>
 
+      {/* NEW SIGNATURE SECTION: Cross-Session Consolidation & Forgetting */}
+      <section className="section" id="consolidation">
+        <div className="section-header">
+          <Archive size={22} />
+          <h2>5. Cross-Session Consolidation &amp; Forgetting (Signature Interactive)</h2>
+        </div>
+        <p>LLMs are stateless between calls. To give them memory that survives the context window and across conversations, we must explicitly design <strong>write</strong> (consolidation), <strong>store</strong>, <strong>decay</strong>, and <strong>retrieve</strong>. This is the real "memory" of production LLM systems and agents.</p>
+
+        <div className="consol-sim">
+          <div className="timeline">
+            {sessions.map(sess => (
+              <div 
+                key={sess.id} 
+                className={`sess-card ${sess.id === activeSessionId ? 'active' : ''}`} 
+                onClick={() => switchToSession(sess.id)}
+              >
+                <div className="label">{sess.label}</div>
+                <div style={{fontSize:'0.7rem', color:'var(--muted)'}}>{sess.facts.length} short-term facts</div>
+                {sess.facts.slice(0,2).map((f,i) => <span key={i} className="pill">{f}</span>)}
+              </div>
+            ))}
+          </div>
+
+          <div className="active-session">
+            <div style={{marginBottom:6, fontWeight:600}}>Current active session: {activeSession.label}</div>
+            <div style={{display:'flex', gap:8, marginBottom:8}}>
+              <input 
+                value={newExp} 
+                onChange={e=>setNewExp(e.target.value)} 
+                placeholder="Add a new experience or fact from this session..." 
+                style={{flex:1, background:'#111', border:'1px solid var(--border)', borderRadius:6, padding:'6px 10px', color:'inherit'}} 
+                onKeyDown={e => e.key==='Enter' && addExperience()}
+              />
+              <button className="button" onClick={addExperience}>Add</button>
+            </div>
+            <div className="fact-list">
+              {activeSession.facts.map((f, i) => (
+                <div key={i} className="fact-pill">{f}</div>
+              ))}
+              {activeSession.facts.length === 0 && <span style={{color:'var(--muted)', fontSize:'0.75rem'}}>No facts yet — add some above</span>}
+            </div>
+            <button 
+              className="button button--primary" 
+              onClick={consolidateSession} 
+              disabled={activeSession.facts.length === 0}
+              style={{marginTop:4}}
+            >
+              <Archive size={15} /> Consolidate top facts into long-term bank
+            </button>
+          </div>
+
+          <div className="decay-controls">
+            <label>Simulate days since last use: <strong>{decayDays}</strong> (affects retrieval scores)</label>
+            <input type="range" min="0" max="120" step="7" value={decayDays} onChange={e=>setDecayDays(parseInt(e.target.value))} />
+            <button className="button" onClick={advanceTime}>+2 weeks</button>
+          </div>
+          <div className="note">Unconsolidated short-term facts are lost when session ends. Consolidated memories slowly lose relevance with time unless re-retrieved and reinforced. This is why real agents have explicit memory managers, importance scoring, and periodic summarization.</div>
+        </div>
+      </section>
+
       <div className="footer">
         <div>LLM memory is the difference between a model that forgets everything after 128k tokens and one that can remember your preferences for months • React + Vite • GitHub Pages</div>
         <div>leonlzd120000/explain</div>
@@ -2073,7 +2171,6 @@ function LlmMemoryPage() {
     </main>
   );
 }
-
 
 function App() {
   const getCurrentHash = () => (window.location.hash || "#/").split("?")[0] || "#/";
